@@ -14,14 +14,13 @@ it retrieve Pollutant Data from EEA Vocabulary [https://dd.eionet.europa.eu/voca
 
 ## **4. Stations**
 It downloads detailed information for each SamplingPointId. It performs a spatial join to merge the spatial information of LAU and NUTS (specifically, the geometries of LAU and the geometry of stations) and fills in the missing data for CITY_NAME and CITY_ID [retrieved from https://discomap.eea.europa.eu/App/AQViewer/index.html?fqn=Airquality_Dissem.b2g.AirQualityStatistics] through a left join based on the AirQualityStationEoICode column.
+  - **Missing cities**:  
+    This file is obtained manually (from 2000 to 2024) because the website did not allow downloading more than 100,000 rows at a time. The data was collected in multiple batches, filtering SamplingPoints using the following criteria:
+    - **Filter on data used in AQ Report**: Yes  
+    - **Filter on data coverage**: Yes  
 
-    - **missing cities**:  
-      This file is obtained manually (from 2000 to 2024) because the website did not allow downloading more than 100,000 rows at a time. The data was collected in multiple batches, filtering SamplingPoints using the following criteria:
-        - Filter on data used in AQ Report: Yes  
-        - Filter on data coverage: Yes  
-
-      For each station:
-      - The column `AirQualityStationEoICode` (identical for all sensors at the same station) was used to select the first row containing unique values for `CITY_NAME` and `CITY_ID`.
-      - No station reported more than one value for this pair of columns.
-      - To support future uploads, it is necessary to integrate updated `AirQualityStationEoICode` values.
+    For each station:
+    - The column `AirQualityStationEoICode` (identical for all sensors at the same station) was used to select the first row containing unique values for `CITY_NAME` and `CITY_ID`.
+    - No station reported more than one value for this pair of columns.
+    - To support future uploads, it is necessary to integrate updated `AirQualityStationEoICode` values.
 
