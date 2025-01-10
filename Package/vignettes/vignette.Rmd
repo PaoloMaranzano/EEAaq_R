@@ -1,0 +1,179 @@
+---
+title: "Vignette"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+
+\
+```{r setup}
+library(EEAaq)
+```
+
+
+The **EEAaq package** allows users to retrieve air quality data for multiple geographical zones, pollutants, and time periods in a single request. Queries are submitted as lists, which enables flexibility in specifying combinations of parameters.
+
+
+## EEAaq_get_data
+
+
+
+Below we demonstrate the use of query by using LAU_ID in one and NUTS_ID in the other:
+\
+- `LAU_ID` of LAU: 
+\
+```{r}
+ #Query NO2 data for a specific LAU zone
+data_lau<- EEAaq::EEAaq_get_data(
+  zone_name = "15146",      # LAU zone code
+  NUTS_level = "LAU",       # NUTS level
+  LAU_ISO = "IT",           # Country code for Italy
+  pollutants = "PM10",       # Pollutant 
+  from = "2022-01-01",      # Start date
+  to = "2023-12-31",        # End date
+  verbose = FALSE            # Print detailed progress
+)
+```
+
+```{r}
+# Preview the first few rows of the dataset
+head(data_lau)
+```
+
+
+
+
+-  `LATN_NAME` of NUTS:
+\
+```{r}
+#Identify the names of the areas from which to download the data
+zones <- c("Région de Bruxelles-Capitale/Brussels Hoofdstedelijk Gewest","Vlaams Gewest","West-Nederland","Zuid-Nederland")
+
+data <- EEAaq::EEAaq_get_data(
+  zone_name = zones,      # LAU zone code
+  NUTS_level = "NUTS1",       # NUTS level
+  pollutants = c("NO2", "PM10"),       # Pollutant 
+  from = "2023-01-01",      # Start date
+  to = "2024-08-29",        # End date
+  verbose = FALSE            # Print detailed progress
+)
+```
+
+
+```{r}
+base::unique(data$AirQualityStationEoICode)
+```
+\
+If the query's zone_name parameter corresponds to a valid *CITY_NAME* (i.e., not NULL in the dataset), the function will return the corresponding data. If no valid CITY_NAME is associated with the zone_name, the function attempts to retrieve all available data for the entire country and subsequently filter for the specified zone_name.
+\
+
+**Note**:
+For very small towns or certain countries such as Turkey or Albania, data may not currently be available in the dataset.This limitation reflects the data unavailability at the [EEA Air Quality Viewer](https://discomap.eea.europa.eu/App/AQViewer/index.html?fqn=Airquality_Dissem.b2g.AirQualityStatistics).
+\
+If the parameters used in the query include *polygon* or *quadrant*, the function outputs an EEAaq_df_sfc object. Otherwise, it returns an EEAaq_df object, which is a tibble dataframe.
+
+
+## EEAaq map stations
+
+EEAaq map stations and accepts
+as input either an object of the EEAaq df class (output of the `EEAaq_get_data` function), or all other parameters specifying the area and the pollutants.
+
+```{r}
+#Map the stations using as EEAaq_df object, the output of the previous function
+EEAaq::EEAaq_map_stations(data = data, bounds_level = "NUTS3", color = FALSE, dynamic = FALSE)
+
+
+
+```
+\
+Using the parameter bounds_level = "NUTS3", the map is generated with internal boundaries corresponding to the NUTS3 level. 
+\
+
+The same output could be obtained specifying explicitly the zone information.
+
+
+```{r}
+EEAaq::EEAaq_map_stations(zone_name = zones, NUTS_level = "NUTS1",
+pollutant = c("NO2", "PM10"), bounds_level = "NUTS3", color = FALSE, dynamic = FALSE)
+```
+
+
+while LAU represents the finest level of granularity compared to NUTS3 which shows only the boundaries of the corresponding municipality.
+
+```{r}
+EEAaq::EEAaq_map_stations(data =data_lau, color =
+TRUE, dynamic=TRUE, ID= TRUE )
+
+```
+
+## EEAaq summary
+
+This function aims to describe the dataset that has been previously imported, both at a global level, which means considering it as a whole, and at the station level, where summary statistics and information are grouped by monitoring station. In addition to these two levels, the function also provides information about the gap length and the correlation between pollutants if at least two pollutants are considered simultaneously.
+The `EEAaq summary` function receives as input an EEAaq df object, i.e. the output of the EEAaq get data function.
+
+```{r}
+summ <- EEAaq::EEAaq_summary(data = data)
+```
+
+```{r}
+summ$Summary
+```
+
+```{r}
+summ$Summary_byStat$Mean_byStat
+```
+
+```{r}
+summ$Corr_Matrix
+```
+
+## EEAaq time aggregate
+
+
+Most pollutants are monitored hourly or daily, posing challenges for interpretation and representation. 
+The `EEAaq_time_aggregate`  function simplifies this by aggregating data into annual, monthly, weekly, daily, or hourly intervals, generating summary statistics for each station in an EEAaq_taggr_df object.
+
+
+```{r}
+#Get the monthly minimum, maximum, mean and median values of the pollutant concentrations
+t_aggr <- EEAaq::EEAaq_time_aggregate(data = data, frequency =
+"monthly", aggr_fun = c("min", "max", "mean", "median" ))
+
+```
+
+
+```{r}
+t_aggr$TimeAggr
+```
+
+```{r}
+t_aggr$TimeAggr_byPollutant$PM10
+```
+
+## EEAaq_idw_map
+
+To enable quick and intuitive visual analysis, a function has been developed to create spatial interpolation maps using the Inverse Distance Weighting (IDW) method, introduced by D. Shepard in 1968.
+This technique estimates the value of a variable at unknown locations by calculating a weighted average of known values, with weights inversely proportional to the distance from known points. Closer points contribute more heavily to the estimate, making it a practical approach for interpolating geolocated air quality data.
+\
+
+```{r}
+EEAaq::EEAaq_idw_map(data = t_aggr, pollutant = "NO2", aggr_fun =
+"mean", distinct = TRUE, gradient = TRUE, idp = 2)
+```
+
+
+
+
+
+```{r}
+t_aggr_1 <- EEAaq::EEAaq_time_aggregate(data = data_lau, frequency =
+"monthly", aggr_fun = c("min", "max", "mean", "median" ))
+EEAaq::EEAaq_idw_map(data = t_aggr_1, pollutant = "NO2", aggr_fun = "mean",
+   distinct = TRUE, gradient = FALSE, dynamic = TRUE, fill_NUTS_level = "LAU")
+```
+
+
