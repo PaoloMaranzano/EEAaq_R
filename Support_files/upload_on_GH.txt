@@ -1,0 +1,99 @@
+#'@title Upload files
+#'
+#'@description After downloading the file in local environment, e.g. (get_LAU), this function will upload the updated file on Github. A control is also performed on the Sha of the two files, if they match, upload is not performed. This additional check was introduced following the logic of updating the file in Github
+#'
+#'
+#' @param file  An R object to be saved and uploaded (e.g., a data.frame).
+#' @param name_file A character string specifying the name of the file to upload (without extension).
+#' @param committer_name name of committer
+#' @param committer_email email of committer
+#' @return NULL. Outputs messages indicating whether the upload was performed or skipped.
+#'
+#'
+#'
+#' @examples
+#' \dontrun{
+#' upload_git (file = NUTS_upload, name_file=  "NUTS")
+#' }
+upload_git <- function(file= NULL, name_file= NULL, committer_name= NULL, committer_email = NULL) {
+  if(!curl::has_internet()) {
+    stop("Please check your internet connection. If the problem persists, please
+         contact the package maintainer.") #se false, stop interrompe esecuzione
+  }
+  if (!is.character(name_file) || !nzchar(name_file) ||
+      !is.character(file) || !nzchar(file) ||
+      !is.character(committer_name) || !nzchar(committer_name) ||
+      !is.character(committer_email) || !nzchar(committer_email)) {
+    stop("You must include all parameters as non-empty character strings.")
+  }
+
+  Sys.setenv(GITHUB_PAT = 'github_
+  pat_
+  11AGJRM5I0fuMaEQ5HGhf3_hExvV8FxlCd2wsfkDDa1WW256hYhpStkiaYjW4UAkiG73F6KYEIow5GxVcA')
+
+  # Crea un file temporaneo e salva il file in RDS
+  temp_dir <- tempdir()
+  if (!dir.exists(temp_dir)) {
+    dir.create(temp_dir, recursive = TRUE)  # Crea la directory se non esiste
+  }
+
+  # Crea il percorso completo per il file
+  file_path <- file.path(temp_dir, paste0(name_file, ".rds"))
+
+  # Salva il file in formato RDS nella directory statica
+  saveRDS(file, file_path, compress = "xz")
+  target_path <- paste0("", name_file, ".rds")
+  cat("path:", target_path, "\n")
+  # Recupera informazioni sul file esistente (se presente)
+  file_info <- tryCatch(
+    gh::gh(
+      "GET /repos/{owner}/{repo}/contents/{path}",
+      owner = "PaoloMaranzano", 		# owner della repository
+      repo = "EEAaq_R_Support",         # nome della repository
+      path = target_path
+    ),
+    error = function(e) NULL # Se il file non esiste, ignora l'errore
+  )
+
+  # Calcola il contenuto e lo SHA del file locale
+  file_content <- readBin(file_path, "raw", file.info(file_path)$size)
+  file_size <- file.info(file_path)$size
+  git_header <- charToRaw(sprintf("blob %d", file_size))
+  git_header <- c(git_header, as.raw(0))
+  git_blob <- c(git_header, file_content)
+  local_sha <- digest::digest(git_blob, algo = "sha1", serialize = FALSE)
+
+  # Recupera lo SHA remoto
+  file_sha <- if (!is.null(file_info)) file_info$sha else NULL
+  cat("remote_sha:", file_sha ,"\n")
+  cat("local_sha:",local_sha, "\n" )
+  # Confronta SHA: se identici, interrompi
+  if (!is.null(file_sha) && identical(file_sha, local_sha)) {
+    cat("The file is still the same. No upload was performed.\n")
+    return(invisible())
+  }
+
+  # Codifica il contenuto del file locale in base64
+  content <- base64enc::base64encode(file_path)
+
+  # Carica o aggiorna il file su GitHub
+  result <- gh::gh(
+    "PUT /repos/{owner}/{repo}/contents/{path}",
+    owner = "PaoloMaranzano",
+    repo = "EEAaq_R/Support_files",
+    path = target_path,
+    message = "Update file via API",
+    content = content,
+    sha = file_sha, # SHA remoto, se presente
+    committer = list(
+      name = committer_name,
+      email = committer_email
+    ),
+    .token = Sys.getenv("GITHUB_PAT")
+  )
+
+  if (!is.null(result)) {
+    cat("The file has been uploaded successfully!\n")
+    cat("File URL:", result$content$html_url, "\n")
+  }
+}
