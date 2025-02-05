@@ -1,0 +1,10 @@
+name: PublishDocument
+title:
+username:
+account: rpubs
+server: rpubs.com
+hostUrl: rpubs.com
+appId: https://api.rpubs.com/api/v1/document/1259147/cb175c6290034a45b5798243ecf8c7f8
+bundleId: https://api.rpubs.com/api/v1/document/1259147/cb175c6290034a45b5798243ecf8c7f8
+url: http://rpubs.com/sam_2020/1259147
+version: 1

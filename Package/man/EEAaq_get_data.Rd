@@ -83,5 +83,5 @@ The levels are defined as follows:
 \examples{
 \donttest{
 data <- EEAaq_get_data(zone_name = "15146", NUTS_level = "LAU",LAU_ISO = "IT",
-pollutants = "NO2", from = "2023-01-01", to = "2024-08-29",  verbose = TRUE)}
+pollutants = c("NO2","CO"), from = "2023-01-01", to = "2024-08-29",  verbose = TRUE)}
 }

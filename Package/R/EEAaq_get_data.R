@@ -39,8 +39,14 @@
 #' the function progress are printed. If \code{FALSE} no message is printed.
 #' @param LAU_ISO a code to identify the corresponding ISO of the country since LAU_ID are not unique over Europe
 #' @details
+#' Some specific notes:
+#' \itemize{
+#' \item{If the parameter \code{zone_name} corresponds to a valid \code{CITY_NAME} (i.e., not NULL in the dataset), the function will return the corresponding data. If no valid \code{CITY_NAME} is associated with the \code{zone_name}, the function attempts to retrieve all available data for the entire country and subsequently filter for the specified zone_name.}
+#' \item{For very small towns or certain countries, such as Turkey or Albania, data may not currently be available in the dataset. This limitation reflects the data unavailability at the the EEA Air Quality Viewer <https://discomap.eea.europa.eu/App/AQViewer/index.html?fqn=Airquality_Dissem.b2g.AirQualityStatistics>.}
+#' \item{If the parameters used in the query include \code{polygon} or \code{quadrant}, the function returns a \code{EEAaq_df_sfc} object. Otherwise, it returns an \code{EEAaq_df} object, which is a tibble dataframe.}
+#' }
 #' The NUTS classification (Nomenclature of territorial units for statistics) is a hierarchical system for dividing up the economic territory of the EU and the UK.
-#' The levels are defined as follows:
+#' The levels are defined as in <https://ec.europa.eu/eurostat/web/gisco/geodata/statistical-units/territorial-units-statistics>, that is,
 #' \itemize{
 #' \item{\strong{NUTS 0}: the whole country}
 #' \item{\strong{NUTS 1}: major socio-economic regions}
@@ -53,8 +59,10 @@
 #' if whether the parameter \code{quadrant} or \code{polygon} is specified.
 #' @examples
 #' \donttest{
-#'data <- EEAaq_get_data(zone_name = "15146", NUTS_level = "LAU",LAU_ISO = "IT",
-#'pollutants = "NO2", from = "2023-01-01", to = "2024-08-29",  verbose = TRUE)}
+#' # Download hourly NO2 concentration for Milan city (LAU = 15146) in 2023
+#' data <- EEAaq_get_data(zone_name = "15146", NUTS_level = "LAU",LAU_ISO = "IT",
+#' pollutants = c("NO2","CO"), from = "2023-01-01", to = "2023-12-31",  verbose = TRUE)
+#' }
 #' @export
 EEAaq_get_data <- function(zone_name = NULL, NUTS_level = NULL, LAU_ISO= NULL, pollutants = NULL, from = NULL, to = NULL, quadrant = NULL, polygon= NULL, verbose = TRUE) {
 
@@ -519,9 +527,7 @@ EEAaq_get_data <- function(zone_name = NULL, NUTS_level = NULL, LAU_ISO= NULL, p
     if (nrow(combined_df) == 0) {
       warning(paste("No data found for the following zone names:",
                     paste(zone_name, collapse = ", "), "\n"))}
-  }
-
-  else if (all(NUTS_level != "NUTS0") & (is.null(quadrant) & is.null(polygon))) {
+  } else if (all(NUTS_level != "NUTS0") & (is.null(quadrant) & is.null(polygon))) {
     combined_df <- combined_df %>%
       # Filtra `combined_df` per i `Samplingpoint` presenti in `stations`
       dplyr::filter(.data$Samplingpoint %in% (
@@ -540,9 +546,7 @@ EEAaq_get_data <- function(zone_name = NULL, NUTS_level = NULL, LAU_ISO= NULL, p
     if (nrow(combined_df) == 0) {
       warning(paste("No data found for the following zone names:",
                     paste(zone_name, collapse = ", "), "\n"))}
-  }
-
-  else if  (all(NUTS_level == "NUTS0")){
+  } else if  (all(NUTS_level == "NUTS0")){
     combined_df <- combined_df %>%
       # Filtra `combined_df` per i `Samplingpoint` presenti in `stations`
       dplyr::filter(.data$Samplingpoint %in% (
@@ -561,9 +565,7 @@ EEAaq_get_data <- function(zone_name = NULL, NUTS_level = NULL, LAU_ISO= NULL, p
     if (nrow(combined_df) == 0) {
       warning(paste("No data found for the following zone names:",
                     paste(zone_name, collapse = ", "), "\n"))}
-  }
-
-  else if  (!is.null(quadrant) | !is.null(polygon) ){
+  } else if  (!is.null(quadrant) | !is.null(polygon) ){
 
     combined_df <- combined_df %>%
       dplyr::filter(.data$Samplingpoint %in% (
@@ -585,7 +587,6 @@ EEAaq_get_data <- function(zone_name = NULL, NUTS_level = NULL, LAU_ISO= NULL, p
   combined_df <- combined_df %>%
     dplyr::filter(!.data$Validity %in% c(-1, -99)) %>%
     dplyr::select(-c( .data$DataCapture, .data$ResultTime)) %>%
-
     dplyr::rename(
       DatetimeBegin = .data$Start,
       DatetimeEnd = .data$End,
@@ -654,7 +655,12 @@ EEAaq_get_data <- function(zone_name = NULL, NUTS_level = NULL, LAU_ISO= NULL, p
       dplyr::relocate(
         dplyr::where(~ typeof(.) == "double" && !inherits(., "POSIXct")), # Solo colonne double NON POSIXct
         .after = "AirQualityStationName"
-      )
+      ) %>%
+      tidyr::pivot_longer(cols = -c("AirQualityStationEoICode",  "AirQualityStationName",
+                                    "AveragingTime", "DatetimeBegin", "DatetimeEnd"),
+                          names_to = "Poll", values_to = "Qty") %>%
+      tidyr::pivot_wider(names_from = "Poll", values_from = "Qty", values_fn = function(x) mean(x,na.rm=T))
+
     return(combined_df)
   }
   combined_df <- process_combined_df(combined_df, pollutant)

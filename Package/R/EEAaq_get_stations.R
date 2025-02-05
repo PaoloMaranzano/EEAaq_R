@@ -7,14 +7,19 @@
 #' @param complete Logic value (T or F). If \code{TRUE}, the dataset contains all the variables given by the EEA.
 #' If \code{FALSE} the dataset contains only a few variables, the most importants. For further details about the variables, see \code{stations}.
 #' @return A tibble containing the stations information. Further details available here \code{stations}.
+#'
+#' @details
+#' Note that, for very small towns or certain countries, such as Turkey or Albania, data may not currently be available in the dataset. This limitation reflects the data unavailability at the the EEA Air Quality Viewer <https://discomap.eea.europa.eu/App/AQViewer/index.html?fqn=Airquality_Dissem.b2g.AirQualityStatistics>.
+#'
 #' @examples
-#' \donttest{EEAaq_get_stations(byStation = FALSE, complete = TRUE)}
+#' \donttest{
+#' EEAaq_get_stations(byStation = FALSE, complete = TRUE)
+#' }
 #' @export
 
 EEAaq_get_stations <- function(byStation = FALSE, complete = TRUE) {
 
   `%>%` <- dplyr::`%>%`
-
 
   #Verifica connessione a internet
   if(!curl::has_internet()) {
@@ -23,8 +28,6 @@ EEAaq_get_stations <- function(byStation = FALSE, complete = TRUE) {
   }
 
   stations <- EEAaq_get_dataframe(dataframe = "stations")
-
-
 
   if(byStation == T) {
     stations <- stations %>% dplyr::distinct(.data$AirQualityStationEoICode, .keep_all = T) %>%

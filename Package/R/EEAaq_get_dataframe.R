@@ -10,8 +10,8 @@
 #'
 #' @examples
 #' \donttest{
-#' LAU <- EEAaq_get_dataframe(dataframe= "LAU")}
-#'
+#' LAU <- EEAaq_get_dataframe(dataframe= "LAU")
+#' }
 #'
 EEAaq_get_dataframe <- function(dataframe = NULL){
 

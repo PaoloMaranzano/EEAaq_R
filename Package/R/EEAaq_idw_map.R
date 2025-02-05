@@ -18,16 +18,16 @@
 #' @param gradient logic value (T or F). If \code{TRUE} (the default) the maps generated are colored with a
 #' continuous color scale. If \code{FALSE}, the color scale is discrete.
 #' @param idp numeric value that specify the inverse distance weighting power. For further information see
-#' \code{\link{idw}}.
+#' \code{\link[gstat]{idw}}.
 #' @param nmax numeric value; specify the number of nearest observations that should be
 #' used for the inverse distance weighting computing, where nearest is defined in terms of the
 #' space of the spatial locations. By default, all observations are used. For further information see
-#' \code{\link{idw}}
+#' \code{\link[gstat]{idw}}
 #' @param maxdist numeric value; only observations within a distance of \code{maxdist} from the prediction location
 #' are used for the idw computation. By default, all observations are used.
 #' If combined with \code{nmax}, both criteria apply.
 #' @param dynamic logic value (T or F). If \code{TRUE} the function creates a Leaflet map widget using
-#' \bold{htmlwidgets} (for further information see \code{\link{leaflet}}). If \code{FALSE} (the default)
+#' \bold{htmlwidgets} (for further information see \code{\link[leaflet]{leaflet}}). If \code{FALSE} (the default)
 #' the maps generated are static.
 #' @param fill_NUTS_level character containing the NUTS level or LAU for which to aggregate the idw computing,
 #' in order to obtain a uniform coloring inside each area at the specified level.
@@ -35,7 +35,7 @@
 #' concentration, computed by the idw, of each pixel inside the respective municipality). Allowed values are
 #' 'NUTS0', 'NUTS1', 'NUTS2', 'NUTS3', 'LAU'.
 #' @param tile character representing the name of the provider tile. To see the full list of the providers, run
-#' \code{leaflet::providers}. For further information see \code{\link{addProviderTiles}}.
+#' \code{\link[leaflet]{providers}}. For further information see \code{\link[leaflet]{addProviderTiles}}.
 #' @param save character representing in which extension to save the map. Allowed values are 'jpeg', 'png', 'pdf'
 #' (if \code{dynamic = FALSE}), 'gif' (if \code{dynamic = FALSE & distinct = TRUE}), 'html' (if \code{dynamic = TRUE}).
 #' @param filepath a character string giving the file path.
@@ -67,31 +67,32 @@
 #' @return cosa restituisce la funzione
 #' @examples
 #' \dontrun{
+#' # Download daily NO2 data in 2023 for Milan city (LAU)
 #' data <- EEAaq_get_data(zone_name = "15146", NUTS_level = "LAU",LAU_ISO = "IT",
-#' pollutants = "NO2", from = "2023-01-01", to = "2024-08-29",  verbose = TRUE)
-#' #Monthly aggregation
+#' pollutants = "NO2", from = "2023-01-01", to = "2023-12-31",  verbose = TRUE)
+#' # Monthly aggregation
 #' t_aggr <- EEAaq_time_aggregate(data = data, frequency = "monthly",
 #' aggr_fun = c("mean", "min", "max"))
 #'
-#'# one map created
+#' # One map created
 #' EEAaq_idw_map(data = t_aggr, pollutant = "NO2", aggr_fun = "mean",
 #' distinct = TRUE, gradient = FALSE, dynamic = TRUE, fill_NUTS_level = "LAU")
 #'
 #'
-#' #Let's try to change the parameters fill_NUTS_level and dynamic
-#' #Now we are going to use a dataset containing PM10 concentrations
-#' #in Milan province (NUTS 3), during 2022
+#' # Let's try to change the parameters fill_NUTS_level and dynamic:
+#' # now we are going to use a dataset containing PM10 concentrations
+#' # in Milan province (NUTS 3), during 2023
 #' data <- EEAaq_get_data(zone_name = "Centro (IT)", NUTS_level = "NUTS1",
-#' pollutant = "PM10", from = "2023-01-01", to = "2024-08-29")
+#' pollutant = "PM10", from = "2023-01-01", to = "2023-12-31")
 #
-#' #yearly aggregation
-#' t_aggr <- EEAaq_time_aggregate(data = data, frequency = "yearly",aggr_fun = "mean")
+#' # Yearly aggregation
+#' t_aggr <- EEAaq_time_aggregate(data = data, frequency = "yearly", aggr_fun = "mean")
 #'
-#' #Let's generate one dynamic map, containing the municipalities inside the Milan province
-#' #filled with the mean concentration value for 2022, computed via idw:
+#' # Let us generate one dynamic map, containing the municipalities inside the Milan province
+#' # filled with the mean concentration value for 2023, computed via IDW:
 #' EEAaq_idw_map(data = t_aggr, pollutant = "PM10", aggr_fun = "mean",
-#' distinct = TRUE, gradient = FALSE, dynamic = TRUE, fill_NUTS_level = "NUTS3")}
-#'
+#' distinct = TRUE, gradient = FALSE, dynamic = TRUE, fill_NUTS_level = "NUTS3")
+#' }
 #'
 #' @export
 
