@@ -115,29 +115,30 @@ and \eqn{s_i}.
 }
 \examples{
 \dontrun{
+# Download daily NO2 data in 2023 for Milan city (LAU)
 data <- EEAaq_get_data(zone_name = "15146", NUTS_level = "LAU",LAU_ISO = "IT",
-pollutants = "NO2", from = "2023-01-01", to = "2024-08-29",  verbose = TRUE)
-#Monthly aggregation
+pollutants = "NO2", from = "2023-01-01", to = "2023-12-31",  verbose = TRUE)
+# Monthly aggregation
 t_aggr <- EEAaq_time_aggregate(data = data, frequency = "monthly",
 aggr_fun = c("mean", "min", "max"))
 
-# one map created
+# One map created
 EEAaq_idw_map(data = t_aggr, pollutant = "NO2", aggr_fun = "mean",
 distinct = TRUE, gradient = FALSE, dynamic = TRUE, fill_NUTS_level = "LAU")
 
 
-#Let's try to change the parameters fill_NUTS_level and dynamic
-#Now we are going to use a dataset containing PM10 concentrations
-#in Milan province (NUTS 3), during 2022
+# Let's try to change the parameters fill_NUTS_level and dynamic:
+# now we are going to use a dataset containing PM10 concentrations
+# in Milan province (NUTS 3), during 2023
 data <- EEAaq_get_data(zone_name = "Centro (IT)", NUTS_level = "NUTS1",
-pollutant = "PM10", from = "2023-01-01", to = "2024-08-29")
-#yearly aggregation
+pollutant = "PM10", from = "2023-01-01", to = "2023-12-31")
+# Yearly aggregation
 t_aggr <- EEAaq_time_aggregate(data = data, frequency = "yearly", aggr_fun = "mean")
 
-#Let's generate one dynamic map, containing the municipalities inside the Milan province
-#filled with the mean concentration value for 2022, computed via idw:
+# Let us generate one dynamic map, containing the municipalities inside the Milan province
+# filled with the mean concentration value for 2023, computed via IDW:
 EEAaq_idw_map(data = t_aggr, pollutant = "PM10", aggr_fun = "mean",
-distinct = TRUE, gradient = FALSE, dynamic = TRUE, fill_NUTS_level = "NUTS3")}
-
+distinct = TRUE, gradient = FALSE, dynamic = TRUE, fill_NUTS_level = "NUTS3")
+}
 
 }

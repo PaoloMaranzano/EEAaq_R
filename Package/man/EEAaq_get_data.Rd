@@ -71,8 +71,14 @@ This function imports air quality datasets at european level, based on the zone,
 This function generates an \code{EEAaq_df} object, or an \code{EEAaq_df_sfc}.
 }
 \details{
+Some specific notes:
+\itemize{
+\item{If the parameter \code{zone_name} corresponds to a valid \code{CITY_NAME} (i.e., not NULL in the dataset), the function will return the corresponding data. If no valid \code{CITY_NAME} is associated with the \code{zone_name}, the function attempts to retrieve all available data for the entire country and subsequently filter for the specified zone_name.}
+\item{For very small towns or certain countries, such as Turkey or Albania, data may not currently be available in the dataset. This limitation reflects the data unavailability at the the EEA Air Quality Viewer \url{https://discomap.eea.europa.eu/App/AQViewer/index.html?fqn=Airquality_Dissem.b2g.AirQualityStatistics}.}
+\item{If the parameters used in the query include \code{polygon} or \code{quadrant}, the function returns a \code{EEAaq_df_sfc} object. Otherwise, it returns an \code{EEAaq_df} object, which is a tibble dataframe.}
+}
 The NUTS classification (Nomenclature of territorial units for statistics) is a hierarchical system for dividing up the economic territory of the EU and the UK.
-The levels are defined as follows:
+The levels are defined as in \url{https://ec.europa.eu/eurostat/web/gisco/geodata/statistical-units/territorial-units-statistics}, that is,
 \itemize{
 \item{\strong{NUTS 0}: the whole country}
 \item{\strong{NUTS 1}: major socio-economic regions}
@@ -82,6 +88,8 @@ The levels are defined as follows:
 }
 \examples{
 \donttest{
+# Download hourly NO2 concentration for Milan city (LAU = 15146) in 2023
 data <- EEAaq_get_data(zone_name = "15146", NUTS_level = "LAU",LAU_ISO = "IT",
-pollutants = c("NO2","CO"), from = "2023-01-01", to = "2024-08-29",  verbose = TRUE)}
+pollutants = c("NO2","CO"), from = "2023-01-01", to = "2023-12-31",  verbose = TRUE)
+}
 }

@@ -53,7 +53,6 @@
 #' \item{\strong{NUTS 2}: basic regions for the application of regional policies}
 #' \item{\strong{NUTS 3}: small regions for specific diagnoses}
 #' }
-
 #'
 #' @return A data frame of class \code{EEAaq_df}, if \code{zone_name} is specified, and of class \code{EEAaq_df_sfc}
 #' if whether the parameter \code{quadrant} or \code{polygon} is specified.
