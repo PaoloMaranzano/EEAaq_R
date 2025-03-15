@@ -1,6 +1,6 @@
 Package: EEAaq
 Title: Handle Air Quality Data from the European Environment Agency Data Portal
-Version: 1.0.0
+Version: 1.0.1
 Authors@R: c(
     person("Paolo", "Maranzano", , "pmaranzano.ricercastatistica@gmail.com", role = c("aut","cre","cph"),
            comment = c(ORCID = "0000-0002-9228-2759")),

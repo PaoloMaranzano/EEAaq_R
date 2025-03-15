@@ -22,19 +22,19 @@
 #' the specified pollutants.
 #' @examples
 #' \donttest{
-#' #Using as example PM data in Lombardia (Italy) during the whole 2022,
-#' #it's possible to map the stations in two ways.
-#' #First of all specifying the zone information:
+#' # Using as example PM data in Lombardia (Italy) during the whole 2022,
+#' # it's possible to map the stations in two ways.
+#' # First of all specifying the zone information:
 #' EEAaq_map_stations(pollutant = c("PM10", "PM2.5"),
 #' zone_name = "Lombardia",NUTS_level = "NUTS2", ID = FALSE, color = FALSE)
-#'
 #' #In this case each point have the same color.
 #'
-#' #Alternatively, it is possible to use the data already downloaded in the parameter data,
-#' #coloring the points based on the pollutants the respective station detects.
-#'data <- EEAaq_get_data(zone_name = "15146", NUTS_level = "LAU",LAU_ISO = "IT",
-#' pollutants = "PM10", from = "2023-01-01", to = "2024-08-29",  verbose = TRUE)
-#' EEAaq_map_stations(data = data, color = TRUE)}
+#' # Alternatively, it is possible to use the data already downloaded in the parameter data,
+#' # coloring the points based on the pollutants the respective station detects.
+#' data <- EEAaq_get_data(zone_name = "15146", NUTS_level = "LAU",LAU_ISO = "IT",
+#' pollutants = "PM10", from = "2023-01-01", to = "2023-05-31",  verbose = TRUE)
+#' EEAaq_map_stations(data = data, color = TRUE)
+#' }
 #'
 #' @export
 

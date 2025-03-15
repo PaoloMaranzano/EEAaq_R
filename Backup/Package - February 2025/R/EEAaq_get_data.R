@@ -39,22 +39,29 @@
 #' the function progress are printed. If \code{FALSE} no message is printed.
 #' @param LAU_ISO a code to identify the corresponding ISO of the country since LAU_ID are not unique over Europe
 #' @details
+#' Some specific notes:
+#' \itemize{
+#' \item{If the parameter \code{zone_name} corresponds to a valid \code{CITY_NAME} (i.e., not NULL in the dataset), the function will return the corresponding data. If no valid \code{CITY_NAME} is associated with the \code{zone_name}, the function attempts to retrieve all available data for the entire country and subsequently filter for the specified zone_name.}
+#' \item{For very small towns or certain countries, such as Turkey or Albania, data may not currently be available in the dataset. This limitation reflects the data unavailability at the the EEA Air Quality Viewer <https://discomap.eea.europa.eu/App/AQViewer/index.html?fqn=Airquality_Dissem.b2g.AirQualityStatistics>.}
+#' \item{If the parameters used in the query include \code{polygon} or \code{quadrant}, the function returns a \code{EEAaq_df_sfc} object. Otherwise, it returns an \code{EEAaq_df} object, which is a tibble dataframe.}
+#' }
 #' The NUTS classification (Nomenclature of territorial units for statistics) is a hierarchical system for dividing up the economic territory of the EU and the UK.
-#' The levels are defined as follows:
+#' The levels are defined as in <https://ec.europa.eu/eurostat/web/gisco/geodata/statistical-units/territorial-units-statistics>, that is,
 #' \itemize{
 #' \item{\strong{NUTS 0}: the whole country}
 #' \item{\strong{NUTS 1}: major socio-economic regions}
 #' \item{\strong{NUTS 2}: basic regions for the application of regional policies}
 #' \item{\strong{NUTS 3}: small regions for specific diagnoses}
 #' }
-
 #'
 #' @return A data frame of class \code{EEAaq_df}, if \code{zone_name} is specified, and of class \code{EEAaq_df_sfc}
 #' if whether the parameter \code{quadrant} or \code{polygon} is specified.
 #' @examples
 #' \donttest{
-#'data <- EEAaq_get_data(zone_name = "15146", NUTS_level = "LAU",LAU_ISO = "IT",
-#'pollutants = c("NO2","CO"), from = "2023-01-01", to = "2024-08-29",  verbose = TRUE)}
+#' # Download hourly NO2 concentration for Milan city (LAU = 15146) in 2023
+#' data <- EEAaq_get_data(zone_name = "15146", NUTS_level = "LAU",LAU_ISO = "IT",
+#' pollutants = c("NO2","CO"), from = "2023-01-01", to = "2023-12-31",  verbose = TRUE)
+#' }
 #' @export
 EEAaq_get_data <- function(zone_name = NULL, NUTS_level = NULL, LAU_ISO= NULL, pollutants = NULL, from = NULL, to = NULL, quadrant = NULL, polygon= NULL, verbose = TRUE) {
 
@@ -190,7 +197,8 @@ EEAaq_get_data <- function(zone_name = NULL, NUTS_level = NULL, LAU_ISO= NULL, p
 
       stations_city <- stations %>%
         dplyr::filter(.data$NUTS1_ID %in% zone_name | .data$NUTS2_ID %in% zone_name | .data$NUTS3_ID %in% zone_name | .data$NUTS1 %in% zone_name | .data$NUTS2 %in% zone_name | .data$NUTS3 %in% zone_name) %>%
-        dplyr::select("NUTS1_ID","NUTS1", "NUTS2_ID","NUTS2",  "NUTS3_ID","NUTS3", "CITY_ID", "CITY_NAME", "ISO")  %>%  dplyr::distinct()
+        dplyr::select("NUTS1_ID","NUTS1", "NUTS2_ID","NUTS2",  "NUTS3_ID","NUTS3", "CITY_ID", "CITY_NAME", "ISO")  %>%
+        dplyr::distinct()
 
       stations_city_val <- stations_city %>% dplyr::filter(!is.na(.data$CITY_NAME))
 
@@ -213,6 +221,7 @@ EEAaq_get_data <- function(zone_name = NULL, NUTS_level = NULL, LAU_ISO= NULL, p
           zone_cities <- append(zone_cities, stations %>%
                                   dplyr::filter(.data$ISO %in% stations_city_na$ISO) %>%
                                   dplyr::pull(.data$CITY_NAME) %>%
+                                  unique() %>%
                                   .[!is.na(.)])
         }
       }
@@ -340,7 +349,7 @@ EEAaq_get_data <- function(zone_name = NULL, NUTS_level = NULL, LAU_ISO= NULL, p
 
       json_body <- base::paste0(
         '{"countries": [', base::paste0('"', countries, '"', collapse = ", "), '],',
-        '"cities": [', base::paste0('"', zone_cities, '"', collapse = ", "), '],',
+        # '"cities": [', base::paste0('"', zone_cities, '"', collapse = ", "), '],',
         '"pollutants": [', base::paste0('"', pollutants , '"', collapse = ", "), '],',
         '"dataset": "', dataset, '",',
         '"dateTimeStart": "', dateStart, '",',

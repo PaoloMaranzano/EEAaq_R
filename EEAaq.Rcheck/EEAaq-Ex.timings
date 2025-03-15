@@ -1,0 +1,7 @@
+name	user	system	elapsed
+EEAaq_export	 6.72	 0.62	18.33	
+EEAaq_get_data	2.57	0.09	5.74	
+EEAaq_get_dataframe	 3.81	 0.16	11.90	
+EEAaq_get_stations	1.04	0.09	1.45	
+EEAaq_idw_map	0	0	0	
+EEAaq_import	 5.58	 0.41	15.56	

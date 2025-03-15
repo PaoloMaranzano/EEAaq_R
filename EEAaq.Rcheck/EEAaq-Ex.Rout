@@ -1,0 +1,321 @@
+
+R version 4.3.2 (2023-10-31 ucrt) -- "Eye Holes"
+Copyright (C) 2023 The R Foundation for Statistical Computing
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> pkgname <- "EEAaq"
+> source(file.path(R.home("share"), "R", "examples-header.R"))
+> options(warn = 1)
+> options(pager = "console")
+> base::assign(".ExTimings", "EEAaq-Ex.timings", pos = 'CheckExEnv')
+> base::cat("name\tuser\tsystem\telapsed\n", file=base::get(".ExTimings", pos = 'CheckExEnv'))
+> base::assign(".format_ptime",
++ function(x) {
++   if(!is.na(x[4L])) x[1L] <- x[1L] + x[4L]
++   if(!is.na(x[5L])) x[2L] <- x[2L] + x[5L]
++   options(OutDec = '.')
++   format(x[1L:3L], digits = 7L)
++ },
++ pos = 'CheckExEnv')
+> 
+> ### * </HEADER>
+> library('EEAaq')
+> 
+> base::assign(".oldSearch", base::search(), pos = 'CheckExEnv')
+> base::assign(".old_wd", base::getwd(), pos = 'CheckExEnv')
+> cleanEx()
+> nameEx("EEAaq_export")
+> ### * EEAaq_export
+> 
+> flush(stderr()); flush(stdout())
+> 
+> base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+> ### Name: EEAaq_export
+> ### Title: Export and save an 'EEAaq_df' class object
+> ### Aliases: EEAaq_export
+> 
+> ### ** Examples
+> 
+> ## No test: 
+> ### Download PM10 data for the province (NUTS-3) of Milano (Italy) from January 1st to January 31st, 2023
+> `%>%` <- dplyr::`%>%`
+> IDstations <- EEAaq_get_stations(byStation = TRUE, complete = FALSE)
+> IDstations <- IDstations %>%
++                 dplyr::filter(NUTS3 %in% c("Milano")) %>%
++                 dplyr::pull(AirQualityStationEoICode) %>%
++                 unique()
+> data <- EEAaq_get_data(IDstations = IDstations, pollutants = "PM10",
++                        from = "2023-01-01", to = "2023-01-31", verbose = TRUE)
+Inputs check started at 2025-03-14 18:41:20.784384
+Download started at 2025-03-14 18:41:20.796347
+[[1]]
+[1] "{\"countries\": [\"IT\"],\"cities\": [\"Milano (greater city)\"],\"pollutants\": [\"PM10\"],\"dataset\": \"2\",\"dateTimeStart\": \"2023-01-01T00:00:00Z\",\"dateTimeEnd\": \"2023-01-31T00:00:00Z\"}"
+
+Post-processing started at 2025-03-14 18:41:21.701339
+> 
+> ### Export data to csv file
+> temp <- tempdir()
+> filepath <- paste0(temp, "/data.csv")
+> EEAaq_export(data = data, filepath = filepath, format = "csv")
+> ## End(No test)
+> 
+> 
+> 
+> base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+> base::cat("EEAaq_export", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+> cleanEx()
+> nameEx("EEAaq_get_data")
+> ### * EEAaq_get_data
+> 
+> flush(stderr()); flush(stdout())
+> 
+> base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+> ### Name: EEAaq_get_data
+> ### Title: Download air quality data at european level from the EEA
+> ###   download service
+> ### Aliases: EEAaq_get_data
+> 
+> ### ** Examples
+> 
+> ## No test: 
+> `%>%` <- dplyr::`%>%`
+> ### Download PM10 data for the province (NUTS-3) of Milano (Italy) from January 1st to January 31st, 2023
+> IDstations <- EEAaq_get_stations(byStation = TRUE, complete = FALSE)
+> IDstations <- IDstations %>%
++                 dplyr::filter(NUTS3 %in% c("Milano")) %>%
++                 dplyr::pull(AirQualityStationEoICode) %>%
++                 unique()
+> data <- EEAaq_get_data(IDstations = IDstations, pollutants = "PM10",
++                        from = "2023-01-01", to = "2023-01-31", verbose = TRUE)
+Inputs check started at 2025-03-14 18:41:37.119626
+Download started at 2025-03-14 18:41:37.13118
+[[1]]
+[1] "{\"countries\": [\"IT\"],\"cities\": [\"Milano (greater city)\"],\"pollutants\": [\"PM10\"],\"dataset\": \"2\",\"dateTimeStart\": \"2023-01-01T00:00:00Z\",\"dateTimeEnd\": \"2023-01-31T00:00:00Z\"}"
+
+Post-processing started at 2025-03-14 18:41:37.631105
+> ## End(No test)
+> 
+> 
+> 
+> base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+> base::cat("EEAaq_get_data", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+> cleanEx()
+> nameEx("EEAaq_get_dataframe")
+> ### * EEAaq_get_dataframe
+> 
+> flush(stderr()); flush(stdout())
+> 
+> base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+> ### Name: EEAaq_get_dataframe
+> ### Title: EEAaq_get_dataframe
+> ### Aliases: EEAaq_get_dataframe
+> 
+> ### ** Examples
+> 
+> ## No test: 
+> LAU <- EEAaq_get_dataframe(dataframe= "LAU")
+> pollutant <- EEAaq_get_dataframe(dataframe = "pollutant")
+> stations <- EEAaq_get_dataframe(dataframe = "stations")
+> NUTS <- EEAaq_get_dataframe(dataframe = "NUTS")
+> ## End(No test)
+> 
+> 
+> 
+> 
+> base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+> base::cat("EEAaq_get_dataframe", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+> cleanEx()
+> nameEx("EEAaq_get_stations")
+> ### * EEAaq_get_stations
+> 
+> flush(stderr()); flush(stdout())
+> 
+> base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+> ### Name: EEAaq_get_stations
+> ### Title: Download EEA measurement station information dataset
+> ### Aliases: EEAaq_get_stations
+> 
+> ### ** Examples
+> 
+> ## No test: 
+> EEAaq_get_stations(byStation = TRUE, complete = TRUE)
+# A tibble: 7,835 × 83
+   Country `B-GNamespace` Year  AirQualityNetwork AirQualityNetworkName Timezone
+   <chr>   <chr>          <chr> <chr>             <chr>                 <chr>   
+ 1 Albania AL.AEF.AQ      2023  NET-AL001A        National Environment… UTC     
+ 2 Albania AL.AEF.AQ      2023  NET-AL001A        National Environment… UTC     
+ 3 Albania AL.AEF.AQ      2023  NET-AL001A        National Environment… UTC     
+ 4 Albania AL.AEF.AQ      2023  NET-AL001A        National Environment… UTC     
+ 5 Albania AL.AEF.AQ      2023  NET-AL001A        National Environment… UTC     
+ 6 Albania AL.AEF.AQ      2023  NET-AL001A        National Environment… UTC     
+ 7 Albania AL.AEF.AQ      2023  NET-AL002A        Institute for Public… UTC     
+ 8 Albania AL.AEF.AQ      2023  NET-AL002A        Institute for Public… UTC     
+ 9 Austria AT.0008.20.AQ  2024  NET.01            Amt der Burgenländis… UTC+01  
+10 Austria AT.0008.20.AQ  2024  NET.01            Amt der Burgenländis… UTC+01  
+# ℹ 7,825 more rows
+# ℹ 77 more variables: AirQualityStationEoICode <chr>,
+#   AirQualityStationNatCode <chr>, AirQualityStationName <chr>,
+#   SamplingPointId <chr>, AirPollutant <chr>, Longitude <dbl>, Latitude <dbl>,
+#   Altitude <chr>, AltitudeUnit <chr>, AirQualityStationArea <chr>,
+#   AirQualityStationType <chr>, OperationalActivityBegin <dttm>,
+#   OperationalActivityEnd <dttm>, SampleId <chr>, InletHeight <chr>, …
+> ## End(No test)
+> 
+> 
+> 
+> base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+> base::cat("EEAaq_get_stations", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+> cleanEx()
+> nameEx("EEAaq_idw_map")
+> ### * EEAaq_idw_map
+> 
+> flush(stderr()); flush(stdout())
+> 
+> base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+> ### Name: EEAaq_idw_map
+> ### Title: Build a spatial interpolation map based on the Inverse Distance
+> ###   Weighting technique. The function 'EEAaq_idw_map' requires as input a
+> ###   'EEAaq_taggr_df' or a 'EEAaq_taggr_df_sfc' class object and produces
+> ###   a spatial interpolation map. Depending on the time frequency of the
+> ###   aggregation, multiple maps are generated, one for each timestamp.
+> ###   Interpolation maps may be exported as pdf, jpeg, png, gif and html.
+> ### Aliases: EEAaq_idw_map
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D ### Filter all the stations installed in the city (LAU) of Milano (Italy)
+> ##D IDstations <- EEAaq_get_stations(byStation = FALSE, complete = FALSE)
+> ##D IDstations <- IDstations %>%
+> ##D                 dplyr::filter(LAU_NAME == "Milano") %>%
+> ##D                 dplyr::pull(AirQualityStationEoICode) %>%
+> ##D                 unique()
+> ##D ### Download NO2 measurement for the city of Milano from January 1st to December 31st, 2023
+> ##D data <- EEAaq_get_data(IDstations = IDstations, pollutants = "NO2",
+> ##D                        from = "2023-01-01", to = "2023-01-31", verbose = TRUE)
+> ##D 
+> ##D ### Monthly aggregation: compute station-specific monthly minimum, average, and maximum NO2 concentrations
+> ##D t_aggr <- EEAaq_time_aggregate(data = data, frequency = "monthly",
+> ##D                                aggr_fun = c("mean", "min", "max"))
+> ##D 
+> ##D ### Static IDW interpolation of the average NO2 concentrations for the whole Lombardy
+> ##D ###    region (NUTS_extborder = "NUTS2"). Interpolated values are then aggregated at the provincial
+> ##D ###    level (NUTS_filler = "NUTS3")
+> ##D EEAaq_idw_map(data = t_aggr, pollutant = "NO2", aggr_fun = "mean",
+> ##D               distinct = TRUE, gradient = FALSE,
+> ##D               dynamic = FALSE,
+> ##D               NUTS_filler = "NUTS3", NUTS_extborder = "NUTS2")
+> ##D 
+> ##D ### Dynamic IDW interpolation map (interactive leafleat) of the average NO2 concentrations for the whole Lombardy
+> ##D ###    region (NUTS_extborder = "NUTS2"). Interpolated values are then aggregated at the municipal
+> ##D ###    level (NUTS_filler = "LAU")
+> ##D EEAaq_idw_map(data = t_aggr, pollutant = "NO2", aggr_fun = "mean",
+> ##D               distinct = TRUE, gradient = FALSE,
+> ##D               dynamic = TRUE,
+> ##D               NUTS_filler = "LAU", NUTS_extborder = "NUTS2", NUTS_intborder = "LAU")
+> ## End(Not run)
+> 
+> 
+> 
+> 
+> base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+> base::cat("EEAaq_idw_map", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+> cleanEx()
+> nameEx("EEAaq_import")
+> ### * EEAaq_import
+> 
+> flush(stderr()); flush(stdout())
+> 
+> base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+> ### Name: EEAaq_import
+> ### Title: Reverse function of 'EEAaq_export'. Reads an 'EEAaq_df' object
+> ###   from a .txt or .csv file saved through 'EEAaq_export'.
+> ### Aliases: EEAaq_import
+> 
+> ### ** Examples
+> 
+> ## No test: 
+> `%>%` <- dplyr::`%>%`
+> ### Download PM10 data for the province (NUTS-3) of Milano (Italy) from January 1st to January 31st, 2023
+> IDstations <- EEAaq_get_stations(byStation = TRUE, complete = FALSE)
+> IDstations <- IDstations %>%
++                 dplyr::filter(NUTS3 %in% c("Milano")) %>%
++                 dplyr::pull(AirQualityStationEoICode) %>%
++                 unique()
+> data <- EEAaq_get_data(IDstations = IDstations, pollutants = "PM10",
++                        from = "2023-01-01", to = "2023-01-31", verbose = TRUE)
+Inputs check started at 2025-03-14 18:41:56.952619
+Download started at 2025-03-14 18:41:56.961176
+[[1]]
+[1] "{\"countries\": [\"IT\"],\"cities\": [\"Milano (greater city)\"],\"pollutants\": [\"PM10\"],\"dataset\": \"2\",\"dateTimeStart\": \"2023-01-01T00:00:00Z\",\"dateTimeEnd\": \"2023-01-31T00:00:00Z\"}"
+
+Post-processing started at 2025-03-14 18:41:57.367448
+> 
+> ### Export data to csv file
+> temp <- tempdir()
+> filepath <- paste0(temp, "/data.csv")
+> EEAaq_export(data = data, filepath = filepath, format = "csv")
+> 
+> ### Import the EEAaq_df object saved in the previous code line
+> EEAaq_import(file_data = filepath)
+# A tibble: 150 × 6
+   AirQualityStationEoICode AirQualityStationName DatetimeBegin      
+   <chr>                    <chr>                 <dttm>             
+ 1 IT0477A                  MILANO - V.LE MARCHE  2023-01-01 01:00:00
+ 2 IT0477A                  MILANO - V.LE MARCHE  2023-01-02 01:00:00
+ 3 IT0477A                  MILANO - V.LE MARCHE  2023-01-03 01:00:00
+ 4 IT0477A                  MILANO - V.LE MARCHE  2023-01-04 01:00:00
+ 5 IT0477A                  MILANO - V.LE MARCHE  2023-01-05 01:00:00
+ 6 IT0477A                  MILANO - V.LE MARCHE  2023-01-06 01:00:00
+ 7 IT0477A                  MILANO - V.LE MARCHE  2023-01-07 01:00:00
+ 8 IT0477A                  MILANO - V.LE MARCHE  2023-01-08 01:00:00
+ 9 IT0477A                  MILANO - V.LE MARCHE  2023-01-09 01:00:00
+10 IT0477A                  MILANO - V.LE MARCHE  2023-01-10 01:00:00
+# ℹ 140 more rows
+# ℹ 3 more variables: DatetimeEnd <dttm>, AveragingTime <chr>, PM10 <dbl>
+> ## End(No test)
+> 
+> 
+> 
+> 
+> base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+> base::cat("EEAaq_import", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+> cleanEx()
+> nameEx("EEAaq_map_stations")
+> ### * EEAaq_map_stations
+> 
+> flush(stderr()); flush(stdout())
+> 
+> base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+> ### Name: EEAaq_map_stations
+> ### Title: Create a static or dynamic (interactive leaflet) map
+> ###   representing the geographical locations of the stations based on a
+> ###   user-defined input dataset of class 'EEAaq_df' or 'EEAaq_df_sfc'.
+> ### Aliases: EEAaq_map_stations
+> 
+> ### ** Examples
+> 
+> ## No test: 
+> `%>%` <- dplyr::`%>%`
+> ### Retrieve all the stations measuring PM10 in Belgium
+> IDstations <- IDstations %>%
++   dplyr::filter(ISO %in% c("BE"),
++                 AirPollutant %in% "PM10") %>%
++   dplyr::pull(AirQualityStationEoICode) %>%
++   unique()
+Error: object 'IDstations' not found
+Execution halted

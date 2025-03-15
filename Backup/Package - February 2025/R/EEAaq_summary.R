@@ -21,7 +21,7 @@
 #' @examples
 #' \donttest{
 #'data <- EEAaq_get_data(zone_name = "15146", NUTS_level = "LAU",LAU_ISO = "IT",
-#' pollutants = "PM10", from = "2023-01-01", to = "2024-08-29",  verbose = TRUE)
+#' pollutants = "PM10", from = "2023-01-01", to = "2023-05-31",  verbose = TRUE)
 #'
 #' EEAaq_summary(data)}
 #'

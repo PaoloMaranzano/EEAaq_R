@@ -1,0 +1,56 @@
+Package: EEAaq
+Title: Handle Air Quality Data from the European Environment Agency Data
+    Portal
+Version: 1.0.0
+Authors@R: c(
+    person("Agostino", "Tassan Mazzocco", , "agostino.tassan@gmail.com", role = c("aut", "cph")),
+    person("Paolo", "Maranzano", , "pmaranzano.ricercastatistica@gmail.com", role = c("aut","cre","cph"),
+           comment = c(ORCID = "0000-0002-9228-2759")),
+    person("Riccardo", "Borgoni", , "riccardo.borgoni@unimib.it", role = c("aut", "cph"),
+           comment = c(ORCID = "0000-0002-2520-3512")),
+    person("Samir", "Doghmi", , "samirdoghmi@hotmail.it", role = c("aut", "cph"))
+  )
+Description: This software downloads and manages air quality data at the
+    European level from the European Environmental Agency (EEA) dataflow
+    (<https://www.eea.europa.eu/data-and-maps/data/aqereporting-9>).  The
+    package allows dynamically mapping the stations, summarising and time
+    aggregating the measurements and building spatial interpolation maps.
+    See the web page <https://www.eea.europa.eu/en> for further information
+    on EEA activities and history.
+License: GPL (>= 3)
+Depends: 
+    R (>= 2.10)
+Imports:
+    arrow,
+    curl,
+    dplyr,
+    ggplot2,
+    ggpubr,
+    gifski,
+    grDevices,
+    gstat,
+    htmlwidgets,
+    httr,
+    leaflet,
+    lubridate,
+    raster,
+    readr,
+    sf,
+    stats,
+    tibble,
+    tidyr,
+    utils
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+Suggests: 
+    knitr,
+    rmarkdown,
+    rvest,
+    readxl,
+    digest,
+    gh,
+    base64enc,
+    stringr
+VignetteBuilder: knitr

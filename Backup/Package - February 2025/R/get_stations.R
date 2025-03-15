@@ -8,8 +8,6 @@
 #' To support future uploads, it is necessary to integrate updated AirQualityStationEoICode values.
 #' @return a tibble
 #'
-#'
-#'
 
 get_stations <- function() {
   `%>%` <- dplyr::`%>%`
