@@ -19,7 +19,8 @@ to the \code{EEAaq_df} class.
 }
 \examples{
 \donttest{
-### Download PM10 data for the province (NUTS-3) of Milano (Italy) from January 1st to January 31st, 2023
+### Download PM10 data for the province (NUTS-3) of Milano (Italy)
+# from January 1st to January 31st, 2023
 `\%>\%` <- dplyr::`\%>\%`
 IDstations <- EEAaq_get_stations(byStation = TRUE, complete = FALSE)
 IDstations <- IDstations \%>\%

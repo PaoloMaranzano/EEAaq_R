@@ -1,12 +1,11 @@
-#' Generate an \code{EEAaq_df} data summary.
-#' This function must be applied to an \code{EEAaq_df} or \code{EEAaq_df_sfc} class object and produces a list of data frames,
-#' containing relevant information about the data, such as descriptive statistics, missing values statistics,
-#' gap length and linear correlation.
+#' Generate an \code{EEAaq_df} data summary
 #'
+#' This function, applied to an \code{EEAaq_df} or \code{EEAaq_df_sfc} class object, produces a list of data frames,
+#' containing relevant information about the data, such as descriptive statistics, missing values statistics,
+#' gap length and correlation.
 #' @param data an \code{EEAaq_df} or \code{EEAaq_df_sfc} class object, which is the output of the \code{\link{EEAaq_get_data}} function.
 #' @param verbose logic value (T or F). If \code{TRUE} (the default) messages about the function progress are printed.
 #' If \code{FALSE} no message is printed.
-#'
 #' @return The function \code{EEAaq_summary} computes and return a list of summary statistics of the dataset given in
 #' \code{data}. In particular the elements of the list are:
 #' \itemize{
@@ -19,11 +18,12 @@
 #' \item{\code{Corr_Matrix} if \code{data} contains more than one pollutant, the correlation matrix between
 #' pollutans is provided, organised by station.}
 #' }
-#'
 #' @examples
 #' \donttest{
-#' ### Download PM10 data for the province (NUTS-3) of Milano (Italy) from January 1st to January 31st, 2023
+#' ### Download PM10 data for the province (NUTS-3) of Milano (Italy)
+#' ##from January 1st to January 31st, 2023
 #' IDstations <- EEAaq_get_stations(byStation = TRUE, complete = FALSE)
+#' `%>%` <- dplyr::`%>%`
 #' IDstations <- IDstations %>%
 #'                 dplyr::filter(NUTS3 %in% c("Milano")) %>%
 #'                 dplyr::pull(AirQualityStationEoICode) %>%

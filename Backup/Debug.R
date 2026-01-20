@@ -238,3 +238,37 @@ EEAaq_export(data = data, filepath = filepath, format = "csv")
 
 ### Import the EEAaq_df object saved in the previous code line
 EEAaq_import(file_data = filepath)
+
+
+
+
+
+
+
+`%>%` <- dplyr::`%>%`
+### Retrieve all the stations measuring PM10 in Belgium
+IDstations <- EEAaq_get_stations(byStation = FALSE, complete = TRUE)
+IDstations <- IDstations %>%
+  dplyr::filter(ISO %in% c("BE"),
+                is.na(OperationalActivityEnd),
+                AirPollutant %in% "PM10") %>%
+  dplyr::pull(AirQualityStationEoICode) %>%
+  unique()
+
+### Download the corresponding data from December 1st to December 31st, 2021
+data <- EEAaq_get_data(IDstations = IDstations, pollutants = "PM10",
+                       from = "2021-12-01", to = "2021-12-31",
+                       verbose = TRUE)
+
+### Static map of available stations across the whole country.
+### External borders are given by the union of the available regions (NUTS-2),
+###   while municipalities (LAUs) are used as inner borders.
+EEAaq_map_stations(data = data,
+                   NUTS_extborder = "NUTS2", NUTS_intborder = "LAU",
+                   color = TRUE, dynamic = FALSE)
+### Dynamic (interactive leaflet) map of available stations across the whole
+###  country. External borders are given by the union of the available
+###  regions (NUTS-2), while provinces (NUTS-3) are used as inner borders.
+EEAaq_map_stations(data = data,
+                   NUTS_extborder = "NUTS2", NUTS_intborder = "NUTS3",
+                   color = TRUE, dynamic = TRUE)

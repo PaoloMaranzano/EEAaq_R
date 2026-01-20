@@ -1,6 +1,6 @@
 Package: EEAaq
 Title: Handle Air Quality Data from the European Environment Agency Data Portal
-Version: 1.0.1
+Version: 1.0.2
 Authors@R: c(
     person("Paolo", "Maranzano", , "pmaranzano.ricercastatistica@gmail.com", role = c("aut","cre","cph"),
            comment = c(ORCID = "0000-0002-9228-2759")),
@@ -37,11 +37,13 @@ Imports:
     stats,
     tibble,
     tidyr,
-    utils
+    utils,
+    tidyselect,
+    ggspatial
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Suggests: 
     knitr,
     rmarkdown,
@@ -51,3 +53,4 @@ Suggests:
     gh,
     base64enc,
     stringr
+VignetteBuilder: knitr

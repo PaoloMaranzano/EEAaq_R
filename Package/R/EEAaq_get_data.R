@@ -26,14 +26,15 @@
 #' @examples
 #' \donttest{
 #' `%>%` <- dplyr::`%>%`
-#' ### Download PM10 data for the province (NUTS-3) of Milano (Italy) from January 1st to January 31st, 2023
+#' ### Download PM10 data for the province (NUTS-3) of Milano (Italy)
+#' ## from January 1st to January 31st, 2023
 #' IDstations <- EEAaq_get_stations(byStation = TRUE, complete = FALSE)
 #' IDstations <- IDstations %>%
 #'                 dplyr::filter(NUTS3 %in% c("Milano")) %>%
 #'                 dplyr::pull(AirQualityStationEoICode) %>%
 #'                 unique()
 #' data <- EEAaq_get_data(IDstations = IDstations, pollutants = "PM10",
-#'                        from = "2023-01-01", to = "2023-01-31", verbose = TRUE)
+#'                        from = "2024-01-01", to = "2025-01-31", verbose = TRUE)
 #' }
 #' @export
 EEAaq_get_data <- function(IDstations = NULL, pollutants = NULL, from = NULL, to = NULL, verbose = TRUE) {
@@ -121,15 +122,44 @@ EEAaq_get_data <- function(IDstations = NULL, pollutants = NULL, from = NULL, to
             paste(missing_stations, collapse = ", "))
   }
 
+
+
+
   ##### Filter user-defined stations
+  #function to report combinations (pollutant-station) not found
+  my_function <- function(x){
+    for (id in IDstations){
+
+      filter_stations <- stations %>%
+        dplyr::filter(.data$AirQualityStationEoICode == id,.data$AirPollutant == x )
+
+      if (nrow(filter_stations) == 0 && verbose== T) {
+        warning(paste("The following stations:", id, "are not associated with the pollutant : ",x))
+      }
+
+    }
+
+  }
   filter_stations <- stations %>%
     dplyr::filter(.data$AirQualityStationEoICode %in% IDstations,.data$AirPollutant %in% pollutants )
+
+  if(nrow(filter_stations)==0){
+    stop(paste("The following stations:", paste(IDstations, collapse = ", "), "are not associated with the pollutant : ",paste(pollutants, collapse = ", ")))
+
+  } else {
+
+    invisible(lapply(pollutants, my_function))
+
+  }
+
+
 
   if (all(!is.na(filter_stations$CITY_NAME))){
     zone_cities <- filter_stations %>%
       dplyr::distinct(CITY_NAME) %>%
       dplyr::pull()
   } else {
+
     na_samplingpoint <- filter_stations %>%
       dplyr::mutate(SamplingPointId = stringr::str_replace_all(stringr::str_sub(.data$SamplingPointId, 4), ":", "_")) %>%
       dplyr::pull(.data$SamplingPointId)  %>%
@@ -147,22 +177,23 @@ EEAaq_get_data <- function(IDstations = NULL, pollutants = NULL, from = NULL, to
   if(verbose ==  T) {
     cat(paste0("Download started at ", Sys.time(), "\n"))
   }
+  # filter dates for download phase
+  dtSt_filter <- base::as.POSIXct(as.Date(from),format = "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
+  dtEn_filter <- base::as.POSIXct(as.Date(to), format = "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
 
   # Gestione date. Separazione in request per dataset (1, 2, 3)
   date_intervals <- handle_dates(from, to)
-  requests_apiUrl1 <- date_intervals[base::sapply(date_intervals, function(x) x$dataset %in% c(1, 2))]
-  requests_apiUrl2 <- date_intervals[base::sapply(date_intervals, function(x) x$dataset %in% c(3))]
 
-  combined_df1 <- NULL
-  combined_df2 <- NULL
+  combined_df <- NULL
+
   #gestione apiurl1
-  if (exists("requests_apiUrl1") && length(requests_apiUrl1) > 0) {
+  if (exists("date_intervals") && length(date_intervals) > 0) {
 
     queries <- list()
-    for (idx in base::seq_along(requests_apiUrl1)) {
-      dataset <- requests_apiUrl1[[idx]]$dataset
-      dateStart <- requests_apiUrl1[[idx]]$dateStart
-      dateEnd <- requests_apiUrl1[[idx]]$dateEnd
+    for (idx in base::seq_along( date_intervals)) {
+      dataset <-  date_intervals[[idx]]$dataset
+      dateStart <-  date_intervals[[idx]]$dateStart
+      dateEnd <-  date_intervals[[idx]]$dateEnd
 
       if ((exists("na_samplingpoint") && length(na_samplingpoint) > 0)) {
         # Query senza parametro citta
@@ -193,7 +224,7 @@ EEAaq_get_data <- function(IDstations = NULL, pollutants = NULL, from = NULL, to
     }
 
     #richiesta singola (o filtrato o tutto dataset) parquet file non ha bisogno di filtro date
-    apiUrl1 <- "https://eeadmz1-downloads-api-appservice.azurewebsites.net/ParquetFile"
+    apiUrl1 <- "https://eeadmz1-downloads-api-appservice.azurewebsites.net/ParquetFile/urls"
     all_data <- list()
 
     for (idx in base::seq_along(queries)) {
@@ -211,43 +242,16 @@ EEAaq_get_data <- function(IDstations = NULL, pollutants = NULL, from = NULL, to
         next
       }
 
-      # Forza il nome della directory temporanea
-      #temp_dir <- base::file.path("C:/Temp/ParquetProcessing", base::paste0("temp_requests_", idx))
-      temp_dir <- base::file.path(tempdir(), base::paste0("temp_requests_", idx))
-      if (base::dir.exists(temp_dir)) {
-        base::unlink(temp_dir, recursive = TRUE)
-      }
-      base::dir.create(temp_dir, recursive = TRUE)
-
-      temp_zip_file <- base::file.path(temp_dir, "temp_file.zip")
-      base::on.exit({ unlink(temp_dir, recursive = TRUE) }, add = TRUE)
-
-      content_raw1 <- httr::content(res, "raw")
-      base::writeBin(content_raw1, temp_zip_file)
-
-      # Verifica se il file .zip  valido
-      if (!base::file.exists(temp_zip_file)) {
-        warning("The zip file was not created correctly for idx =", idx)
-        next
-      }
-      file_info <- base::file.info(temp_zip_file)
-      if (file_info$size == 0) {
-        warning("The zip file is empty for idx ", idx)
-        next
-      }
-
-      # Estrai il contenuto del file .zip
-      utils::unzip(temp_zip_file, exdir = temp_dir)
-      unzipped_files <- base::list.files(temp_dir, recursive = TRUE, full.names = TRUE)
+      #corpo risposta HTTp
+      content_raw1 <- httr::content(res, as = "text", encoding = "UTF-8")
 
 
-      # Verifica la presenza di file .parquet
-      parquet_files <- base::list.files(temp_dir, pattern = "\\.parquet$", full.names = TRUE, recursive = TRUE)
-      if (length(parquet_files) == 0) {
-        warning("The zip file is empty for idx ", idx)
-        next
-      }
+      #per separare files
+      lines <- unlist(strsplit(content_raw1, "\n"))
+      parquet_files <- base::grep("\\.parquet$", lines, value = TRUE)
+      if (base::length(parquet_files) == 0) stop("No valid parquet file found in the answer.")
 
+      #print(parquet_files )
       ##########################################################################################################filtro se na_sampling > 0
       if (exists("na_samplingpoint") && !is.null(na_samplingpoint) && length(na_samplingpoint) > 0) {
         parquet_files <- parquet_files[stringr::str_detect(
@@ -268,106 +272,33 @@ EEAaq_get_data <- function(IDstations = NULL, pollutants = NULL, from = NULL, to
         arrow::read_parquet(file)
       }))
 
+
       all_data[[idx]] <- data_for_request
     }
 
-    combined_df1 <- dplyr::bind_rows(all_data)
-    if ("FkObservationLog" %in% colnames(combined_df1)) {
-      combined_df1 <- combined_df1 %>%
-        dplyr::select(-.data$FkObservationLog)
+    combined_df <- dplyr::bind_rows(all_data)
+
+    ##### Check if we have any data before proceeding
+
+    if (nrow(combined_df) == 0  || is.null(combined_df)) {
+      stop("No data available for the specified parameters")
+    }
+
+    combined_df <- combined_df  %>% dplyr::filter(.data$Start >= dtSt_filter & .data$End <= dtEn_filter)
+    ##### Check for empty dataset
+
+    if (nrow(combined_df) == 0) {
+      stop("No data is available after filtering the date")
+    }
+
+
+    #print(paste("n righe:", nrow(combined_df1)))
+    if ("FkObservationLog" %in% colnames(combined_df)) {
+      combined_df <- combined_df %>%
+        dplyr::select(-FkObservationLog)
     }
     #print(paste("Dati combinati: ", nrow(combined_df), " righe."))
   }
-
-  # Gestione apiUrl2
-  if (exists("requests_apiUrl2") && length(requests_apiUrl2) > 0) {
-    apiUrl2 <- "https://eeadmz1-downloads-api-appservice.azurewebsites.net/ParquetFile/urls"
-
-    dateStart <- requests_apiUrl2[[1]]$dateStart
-    dateEnd <- requests_apiUrl2[[1]]$dateEnd
-
-    if ((exists("na_samplingpoint") && length(na_samplingpoint) > 0)) {
-      # Query senza parametro citta
-      json_body <- base::paste0(
-        '{"countries": [', base::paste0('"', countries, '"', collapse = ", "), '],',
-        '"cities": [', "", '],',
-        '"pollutants": [', base::paste0('"', pollutants , '"', collapse = ", "), '],',
-        '"dataset": "', 3, '",',
-        '"dateTimeStart": "', dateStart, '",',
-        '"dateTimeEnd": "', dateEnd, '"',
-        '}'
-      ) }  else {
-        json_body <- base::paste0(
-          '{"countries": [', base::paste0('"', countries, '"', collapse = ", "), '],',
-          '"cities": [', base::paste0('"', zone_cities, '"', collapse = ", "), '],',
-          '"pollutants": [', base::paste0('"', pollutants , '"', collapse = ", "), '],',
-          '"dataset": "', 3, '",',
-          '"dateTimeStart": "', dateStart, '",',
-          '"dateTimeEnd": "', dateEnd, '"',
-          '}'
-        )}
-
-    print(json_body)
-    # Invia la richiesta POST
-    res <- httr::POST(
-      url = apiUrl2,
-      body =  json_body ,
-      encode = "raw",
-      httr::add_headers("Content-Type" = "application/json")
-    )
-
-    # Estrai gli URL dei file .parquet dalla risposta
-    content_raw <- httr::content(res, as = "text", encoding = "UTF-8")
-    #estrae primo elemento dopo strip
-    lines <- base::strsplit(content_raw, "\r\n")[[1]]
-    #Controllo degli URL validi
-    parquet_urls <- base::grep("\\.parquet$", lines, value = TRUE)
-    if (base::length(parquet_urls) == 0) stop("No valid URL found in the answer.")
-
-    # Usa una directory temporanea fissa per scaricare i file
-    base_temp_dir <- base::file.path(tempdir(), "ParquetFiles")
-    #base_temp_dir <- "C:/Temp/ParquetFiles"
-    # Svuota la directory temporanea se esiste
-    if (base::dir.exists(base_temp_dir)) {
-      base::unlink(base_temp_dir, recursive = TRUE)
-    }
-    base::dir.create(base_temp_dir, recursive = TRUE)
-    downloaded_files <- base::character()
-    # Itera sugli URL validi e scarica ciascun file nella directory temporanea
-    for (i in base::seq_along(parquet_urls)) {
-      dest_file <- base::file.path(base_temp_dir, base::basename(parquet_urls[i]))
-      tryCatch({
-        utils::download.file(parquet_urls[i], dest_file, mode = "wb", quiet = TRUE)
-        downloaded_files <- base::c(downloaded_files, dest_file)  # Aggiungi il file scaricato
-
-      }, error = function(e) {
-        base::warning("Error while downloading ", parquet_urls[i], ": ", e$message)
-      })
-    }
-    print(downloaded_files)
-    ##################################################################################
-    if (exists("na_samplingpoint") && !is.null(na_samplingpoint) && length(na_samplingpoint) > 0) {
-      patterns <- stringr::str_sub(na_samplingpoint, 1, 30)
-      downloaded_files <- downloaded_files[stringr::str_detect(
-        basename(downloaded_files),
-        paste(patterns, collapse = "|") #converte na_samplingpoint in una sola stringa separando con operatore or
-      )]}
-    cat( "filtrati", downloaded_files)
-    #########################################################################################
-
-    if (base::length(downloaded_files) == 0) base::stop("No files successfully downloaded.")
-    if(verbose ==  T) {
-      # base::print(downloaded_files)
-    }
-    # Converti `dateStart` e `dateEnd` in formato POSIXct
-    dateStart <- base::as.POSIXct(dateStart,format = "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
-    dateEnd <- base::as.POSIXct(dateEnd, format = "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
-    combined_df2 <- arrow::open_dataset(downloaded_files) %>%
-      dplyr::filter(.data$Start >= dateStart & .data$End <= dateEnd) %>%
-      dplyr::collect()
-  }
-
-
 
   #####################################
   ########## Post-processing ##########
@@ -377,23 +308,27 @@ EEAaq_get_data <- function(IDstations = NULL, pollutants = NULL, from = NULL, to
     cat(paste0("Post-processing started at ", Sys.time(), "\n"))
   }
 
-  ##### Check for empty dataset
-  combined_df <- dplyr::bind_rows(combined_df1, combined_df2)
-  if (nrow(combined_df) == 0) {
-    base::warning("Combined data frame is empty.")
-  }
+
+
 
   ##### Add stations code and name
   combined_df <- combined_df %>%
+    dplyr::filter(Samplingpoint %in% unique(filter_stations$SamplingPointId)) %>%
     dplyr::left_join(
       filter_stations %>%
-        dplyr::select(
-          .data$SamplingPointId,
-          .data$AirQualityStationEoICode,
-          .data$AirQualityStationName
-        ),
-      by = c("Samplingpoint" = "SamplingPointId")  # Mappatura corretta delle colonne
-    )
+        dplyr::select(SamplingPointId, AirQualityStationEoICode, AirQualityStationName),
+      by = c("Samplingpoint" = "SamplingPointId"))
+  #check se Idstazione richiesto è presente
+  stations_missing <- setdiff(IDstations, unique(combined_df$	AirQualityStationEoICode))
+  if ( length(stations_missing) > 0){
+    if (length(IDstations) == length(stations_missing )){
+      stop(paste("None of the requested stations are available in the data: ",
+                 paste(IDstations, collapse = ", ")))
+    }else{
+      warning("The following stations are not included in stations dataframe : ",
+              paste(stations_missing, collapse = ", "))
+    }
+  }
 
   ##### Other manipulations
   combined_df <- combined_df %>%
@@ -403,10 +338,10 @@ EEAaq_get_data <- function(IDstations = NULL, pollutants = NULL, from = NULL, to
     dplyr::select(-dplyr::any_of(c("DataCapture", "ResultTime"))) %>%
     # Rename
     dplyr::rename(
-      DatetimeBegin = .data$Start,
-      DatetimeEnd = .data$End,
-      AveragingTime = .data$AggType,
-      Concentration= .data$Value
+      DatetimeBegin = Start,
+      DatetimeEnd = End,
+      AveragingTime = AggType,
+      Concentration= Value
     )
 
   ##### Check overwriting tra day e hour
@@ -415,9 +350,9 @@ EEAaq_get_data <- function(IDstations = NULL, pollutants = NULL, from = NULL, to
       dplyr::group_by(.data$AirQualityStationEoICode, .data$Pollutant, .data$DatetimeBegin, .data$DatetimeEnd) %>%
       dplyr::mutate(n_righe = dplyr::n()) %>%
       dplyr::filter(
-        .data$n_righe == 1 | (.data$n_righe > 1 & .data$AveragingTime == "hour")
+        n_righe == 1 | (.data$n_righe > 1 & .data$AveragingTime == "hour")
       ) %>%
-      dplyr::select(-.data$n_righe) %>%
+      dplyr::select(-n_righe) %>%
       dplyr::ungroup()
   }
 
@@ -432,19 +367,19 @@ EEAaq_get_data <- function(IDstations = NULL, pollutants = NULL, from = NULL, to
     dayss <- combined_df %>%
       dplyr::filter(.data$AveragingTime == "day") %>%
       dplyr::mutate(PollutantName = pollutant_map$Notation[base::match(.data$Pollutant, pollutant_map$Code)]) %>%
-      dplyr::select(.data$AirQualityStationEoICode,.data$AirQualityStationName,.data$PollutantName,
-                    .data$AveragingTime,.data$DatetimeBegin,.data$Concentration) %>%
+      dplyr::select(AirQualityStationEoICode,AirQualityStationName,PollutantName,
+                    AveragingTime,DatetimeBegin,Concentration) %>%
       dplyr::mutate(DatetimeBegin = as.character(format(x = .data$DatetimeBegin, format = "%Y-%m-%d %H:%M:%S"))) %>%
-      tidyr::pivot_wider(names_from = .data$DatetimeBegin, values_from = .data$Concentration) %>%
-      tidyr::pivot_longer(cols = -c(.data$AirQualityStationEoICode,.data$AirQualityStationName,
-                                    .data$PollutantName,.data$AveragingTime),
+      tidyr::pivot_wider(names_from = DatetimeBegin, values_from = Concentration) %>%
+      tidyr::pivot_longer(cols = -c(AirQualityStationEoICode,AirQualityStationName,
+                                    PollutantName,AveragingTime),
                           names_to = "DatetimeBegin",
                           values_to = "Concentration") %>%
       dplyr::mutate(DatetimeBegin = lubridate::ymd_hms(.data$DatetimeBegin),
                     DatetimeEnd = .data$DatetimeBegin + lubridate::days(1), .after = .data$DatetimeBegin) %>%
       tidyr::pivot_wider(
-        names_from = .data$PollutantName,
-        values_from = .data$Concentration,
+        names_from = PollutantName,
+        values_from = Concentration,
         values_fn = function(x) mean(x,na.rm=T)
       )
   } else {
@@ -455,21 +390,21 @@ EEAaq_get_data <- function(IDstations = NULL, pollutants = NULL, from = NULL, to
     hourss <- combined_df %>%
       dplyr::filter(.data$AveragingTime == "hour") %>%
       dplyr::mutate(PollutantName = pollutant_map$Notation[base::match(.data$Pollutant, pollutant_map$Code)]) %>%
-      dplyr::select(.data$AirQualityStationEoICode,.data$AirQualityStationName,.data$PollutantName,
-                    .data$AveragingTime,.data$DatetimeBegin,.data$Concentration) %>%
+      dplyr::select(AirQualityStationEoICode,AirQualityStationName,PollutantName,
+                    AveragingTime,DatetimeBegin,Concentration) %>%
       dplyr::mutate(DatetimeBegin = as.character(format(x = .data$DatetimeBegin, format = "%Y-%m-%d %H:%M:%S"))) %>%
-      tidyr::pivot_wider(names_from = .data$DatetimeBegin,
-                         values_from = .data$Concentration,
+      tidyr::pivot_wider(names_from = DatetimeBegin,
+                         values_from = Concentration,
                          values_fn = function(x) mean(x,na.rm=T)) %>%
-      tidyr::pivot_longer(cols = -c(.data$AirQualityStationEoICode,.data$AirQualityStationName,
-                                    .data$PollutantName,.data$AveragingTime),
+      tidyr::pivot_longer(cols = -c(AirQualityStationEoICode,AirQualityStationName,
+                                    PollutantName,AveragingTime),
                           names_to = "DatetimeBegin",
                           values_to = "Concentration") %>%
       dplyr::mutate(DatetimeBegin = lubridate::ymd_hms(.data$DatetimeBegin),
                     DatetimeEnd = .data$DatetimeBegin + lubridate::hours(1), .after = .data$DatetimeBegin) %>%
       tidyr::pivot_wider(
-        names_from = .data$PollutantName,
-        values_from = .data$Concentration,
+        names_from = PollutantName,
+        values_from = Concentration,
         values_fn = function(x) mean(x,na.rm=T)
       )
   } else {
@@ -477,8 +412,8 @@ EEAaq_get_data <- function(IDstations = NULL, pollutants = NULL, from = NULL, to
   }
   # Concatenate restuls for dayss e hourss
   combined_df <- dplyr::bind_rows(dayss, hourss) %>%
-    dplyr::select(.data$AirQualityStationEoICode,.data$AirQualityStationName,
-                  .data$DatetimeBegin,.data$DatetimeEnd,.data$AveragingTime,dplyr::everything()) %>%
+    dplyr::select(AirQualityStationEoICode,AirQualityStationName,
+                  DatetimeBegin,DatetimeEnd,AveragingTime,dplyr::everything()) %>%
     dplyr::arrange(.data$AirQualityStationEoICode,.data$AirQualityStationName,.data$DatetimeBegin)
 
 

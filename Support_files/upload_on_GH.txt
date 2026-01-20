@@ -1,4 +1,4 @@
-#'@title Upload files
+#'@title Upload files on GitHub
 #'
 #'@description After downloading the file in local environment, e.g. (get_LAU), this function will upload the updated file on Github. A control is also performed on the Sha of the two files, if they match, upload is not performed. This additional check was introduced following the logic of updating the file in Github
 #'

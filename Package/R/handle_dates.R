@@ -19,8 +19,8 @@ handle_dates <- function(from,to ) {
   dateTimeEnd <- lubridate::as_date(to)
 
   # Define date ranges for each dataset
-  E1_range <- lubridate::interval(lubridate::ymd("2024-01-01"), lubridate::today())
-  E2_range <- lubridate::interval(lubridate::ymd("2013-01-01"), lubridate::ymd("2023-12-31"))
+  E1_range <- lubridate::interval(lubridate::ymd("2025-01-01"), lubridate::today())
+  E2_range <- lubridate::interval(lubridate::ymd("2013-01-01"), lubridate::ymd("2024-12-31"))
   E3_range <- lubridate::interval(lubridate::ymd("1900-01-01"), lubridate::ymd("2012-12-31"))
 
   # Initialize lists to store results
@@ -45,8 +45,8 @@ handle_dates <- function(from,to ) {
   else if (dateTimeStart %within% E3_range && dateTimeEnd %within% E1_range) {
     datasets <- list(
       list(dataset = 3, dateStart = dateTimeStart, dateEnd = lubridate::ymd("2012-12-31")),
-      list(dataset = 2, dateStart = lubridate::ymd("2013-01-01"), dateEnd = lubridate::ymd("2023-12-31")),
-      list(dataset = 1, dateStart = lubridate::ymd("2024-01-01"), dateEnd = dateTimeEnd)
+      list(dataset = 2, dateStart = lubridate::ymd("2013-01-01"), dateEnd = lubridate::ymd("2024-12-31")),
+      list(dataset = 1, dateStart = lubridate::ymd("2025-01-01"), dateEnd = dateTimeEnd)
     )
   } else if (dateTimeStart %within% E3_range && dateTimeEnd %within% E2_range) {
     datasets <- list(
@@ -55,8 +55,8 @@ handle_dates <- function(from,to ) {
     )
   } else if (dateTimeStart %within% E2_range && dateTimeEnd %within% E1_range) {
     datasets <- list(
-      list(dataset = 2, dateStart = dateTimeStart, dateEnd = lubridate::ymd("2023-12-31")),
-      list(dataset = 1, dateStart = lubridate::ymd("2024-01-01"), dateEnd = dateTimeEnd)
+      list(dataset = 2, dateStart = dateTimeStart, dateEnd = lubridate::ymd("2024-12-31")),
+      list(dataset = 1, dateStart = lubridate::ymd("2025-01-01"), dateEnd = dateTimeEnd)
     )
   } else {
     stop("The specified dates do not fall within valid ranges.")

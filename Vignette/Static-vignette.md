@@ -1,11 +1,11 @@
 ---
 title: 'Extended vignette for **EEAaq: Handle Air Quality Data from the European Environment Agency Data Portal**'
 author:
-- Paolo Maranzano, University of Milano-Bicocca, Italy, paolo.maranzano@unimib.it
+- Paolo Maranzano, University of Milano-Bicocca, Italy \& Fondazione Eni Enrico Mattei, paolo.maranzano@unimib.it
 - Riccardo Borgoni, University of Milano-Bicocca, Italy, riccardo.borgoni@unimib.it
 - Agostino Tassan Mazzocco, University of Milano-Bicocca, Italy
 - Samir Doghmi, University of Milano-Bicocca, Italy
-date: "05 febbraio 2025"
+date: "January 20th, 2026"
 output:
   pdf_document:
     fig_caption: true

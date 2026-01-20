@@ -8,6 +8,8 @@
 #' To support future uploads, it is necessary to integrate updated AirQualityStationEoICode values.
 #' @return a tibble
 #'
+#'
+#'
 
 get_stations <- function() {
   `%>%` <- dplyr::`%>%`
@@ -61,18 +63,25 @@ get_stations <- function() {
   # Livello 2: Regioni
   # Livello 3: Province
 
-  Nuts <- EEAaq_get_dataframe(dataframe = "NUTS")
+  Nuts <- EEAaq_get_dataframe(dataframe = "NUTS")%>% sf::st_drop_geometry() %>%
+    as.data.frame()
   levels <- list(
-    nuts0 = Nuts %>% base::as.data.frame() %>% dplyr::filter(.data$LEVL_CODE == 0) %>% dplyr::select(.data$NUTS_ID,.data$NAME_LATN) %>% dplyr::rename(NUTS0_ID = .data$NUTS_ID, NUTS0 = .data$NAME_LATN),
-    nuts1 = Nuts %>% base::as.data.frame() %>% dplyr::filter(.data$LEVL_CODE == 1) %>% dplyr::select(.data$NUTS_ID, .data$NAME_LATN) %>% dplyr::rename(NUTS1_ID = .data$NUTS_ID, NUTS1 = .data$NAME_LATN),
-    nuts2 = Nuts %>% base::as.data.frame() %>% dplyr::filter(.data$LEVL_CODE == 2) %>% dplyr::select(.data$NUTS_ID, .data$NAME_LATN) %>% dplyr::rename(NUTS2_ID = .data$NUTS_ID, NUTS2 = .data$NAME_LATN),
-    nuts3 = Nuts %>% base::as.data.frame() %>% dplyr::filter(.data$LEVL_CODE == 3) %>% dplyr::select(.data$NUTS_ID, .data$NAME_LATN) %>% dplyr::rename(NUTS3_ID = .data$NUTS_ID, NUTS3 = .data$NAME_LATN)
+    nuts0 = Nuts %>% base::as.data.frame() %>% dplyr::filter(.data$LEVL_CODE == 0) %>% dplyr::select(NUTS_ID,NAME_LATN) %>% dplyr::rename(NUTS0_ID = NUTS_ID, NUTS0 = NAME_LATN),
+    nuts1 = Nuts %>% base::as.data.frame() %>% dplyr::filter(.data$LEVL_CODE == 1) %>% dplyr::select(NUTS_ID, NAME_LATN) %>% dplyr::rename(NUTS1_ID = NUTS_ID, NUTS1 = NAME_LATN),
+    nuts2 = Nuts %>% base::as.data.frame() %>% dplyr::filter(.data$LEVL_CODE == 2) %>% dplyr::select(NUTS_ID, NAME_LATN) %>% dplyr::rename(NUTS2_ID = NUTS_ID, NUTS2 = NAME_LATN),
+    nuts3 = Nuts %>% base::as.data.frame() %>% dplyr::filter(.data$LEVL_CODE == 3) %>% dplyr::select(NUTS_ID, NAME_LATN) %>% dplyr::rename(NUTS3_ID = NUTS_ID, NUTS3 = NAME_LATN)
   )
-
   Nuts_join <- levels$nuts0 %>%
     dplyr::left_join(levels$nuts1 %>% dplyr::mutate(NUTS0_ID = base::substr(.data$NUTS1_ID, 1, 2)), by = c("NUTS0_ID" = "NUTS0_ID")) %>%
     dplyr::left_join(levels$nuts2 %>% dplyr::mutate(NUTS1_ID = base::substr(.data$NUTS2_ID, 1, 3)), by = c("NUTS1_ID" = "NUTS1_ID")) %>%
     dplyr::left_join(levels$nuts3 %>% dplyr::mutate(NUTS2_ID = base::substr(.data$NUTS3_ID, 1, 4)), by = c("NUTS2_ID" = "NUTS2_ID"))
+
+
+
+  Lau <- EEAaq_get_dataframe(dataframe = "LAU")
+
+  Lau_nuts <- Lau %>%
+    dplyr::full_join(Nuts_join, by = c("NUTS3_ID" = "NUTS3_ID"))
 
   Lau <- EEAaq_get_dataframe(dataframe = "LAU")
 
@@ -95,7 +104,8 @@ get_stations <- function() {
   # Filter to only valid geometries
   Lau_nuts <- Lau_nuts %>%
     dplyr::filter(sf::st_is_valid(.data$Lau_geometry))%>%
-    dplyr::select(-.data$POP_2021, -.data$POP_DENS_2, -.data$AREA_KM2, -.data$YEAR, -.data$GISCO_ID)
+    dplyr::select(-POP_2021, -POP_DENS_2, -AREA_KM2, -YEAR, -GISCO_ID)
+
 
 
   # Perform spatial join if all geometries are valid
@@ -105,15 +115,15 @@ get_stations <- function() {
       Longitude = sf::st_coordinates(.)[, 1],
       Latitude = sf::st_coordinates(.)[, 2]
     ) %>%
-    dplyr::relocate(.data$Longitude, .data$Latitude, .before = .data$Altitude) %>%
+    dplyr::relocate(Longitude, Latitude, .before = Altitude) %>%
     sf::st_drop_geometry()
 
 
-# get missing cities dataframe
+  # get missing cities dataframe
 
 
   temp <- tempfile()
-  res <- curl::curl_fetch_disk("https://github.com/PaoloMaranzano/EEAaq_R_Support/raw/refs/heads/main/missing_cities.rds", temp)
+  res <- curl::curl_fetch_disk("https://github.com/PaoloMaranzano/EEAaq_R/raw/refs/heads/main/Support_files/missing_cities.rds", temp)
   if (res$status_code == 200) {
     missing_cities <- readr::read_rds(temp)  # Usa 'load()' per file .rda
 
@@ -129,7 +139,7 @@ get_stations <- function() {
 
   stations <- stations %>%
     dplyr::left_join(missing_cities, by = c("AirQualityStationEoICode", "AirQualityNetwork")) %>%
-    dplyr::rename(CITY_NAME = .data$City, CITY_ID = .data$CityCode)
+    dplyr::rename(CITY_NAME = City, CITY_ID = CityCode)
 
   #rimuoviamo spazi vuoti e convertiamo stringhe vuote in na
   stations <- stations %>%
@@ -142,26 +152,9 @@ get_stations <- function() {
       }
     ))
 
-
-  station_nuts3_na <- stations[is.na(stations$NUTS3_ID), ]
-  station_valid <- stations[!is.na(stations$NUTS3_ID), ]
-
-  # Popola CITY_NAME e CITY_ID per righe valide
-  station_valid <- station_valid %>%
-    dplyr::group_by(.data$NUTS3_ID) %>%
-    dplyr::mutate(
-      CITY_NAME = ifelse(is.na(CITY_NAME), unique(stats::na.omit(.data$CITY_NAME))[1], .data$CITY_NAME),
-      CITY_ID = ifelse(is.na(CITY_ID), unique(stats::na.omit(.data$CITY_ID))[1], .data$CITY_ID)
-    ) %>%
-    dplyr::ungroup()
-
-  # Combina le due parti
-  stations <- dplyr::bind_rows(station_valid, station_nuts3_na)
-
   stations <- stations %>%
     dplyr::mutate(SamplingPointId = paste0(.data$ISO, "/", .data$SamplingPointId)) %>%
     dplyr::distinct(.data$SamplingPointId, .keep_all = TRUE)
 
   return(stations)
 }
-

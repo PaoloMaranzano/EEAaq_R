@@ -30,8 +30,7 @@ EEAaq_get_stations <- function(byStation = TRUE, complete = TRUE) {
   stations <- EEAaq_get_dataframe(dataframe = "stations")
 
   stations <- stations %>%
-    dplyr::mutate(SamplingPointId = paste0(.data$ISO, "/", .data$SamplingPointId),
-                  OperationalActivityBegin = lubridate::dmy_hms(.data$OperationalActivityBegin),
+    dplyr::mutate(OperationalActivityBegin = lubridate::dmy_hms(.data$OperationalActivityBegin),
                   OperationalActivityEnd = lubridate::dmy_hms(.data$OperationalActivityEnd))
 
   if(byStation == T) {

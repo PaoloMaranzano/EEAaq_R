@@ -8,7 +8,8 @@
 #' @examples
 #' \donttest{
 #' `%>%` <- dplyr::`%>%`
-#' ### Download PM10 data for the province (NUTS-3) of Milano (Italy) from January 1st to January 31st, 2023
+#' ### Download PM10 data for the province (NUTS-3) of Milano (Italy)
+#' ## from January 1st to January 31st, 2023
 #' IDstations <- EEAaq_get_stations(byStation = TRUE, complete = FALSE)
 #' IDstations <- IDstations %>%
 #'                 dplyr::filter(NUTS3 %in% c("Milano")) %>%

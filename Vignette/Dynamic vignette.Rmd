@@ -15,7 +15,7 @@ output:
 subtitle: Extended vignette
 ---
 
-The **EEAaq package** allows users to retrieve air quality data for multiple geographical zones, pollutants, and time periods in a single request. Queries are submitted as lists, which enables flexibility in specifying combinations of parameters.
+The **EEAaq package** allows users to retrieve air quality data for a user-defined vector of stations ID (to be pre-filtered by the user before the query), pollutants, and time periods in a single request. Queries are submitted to EEA air quality data flow as lists, which enables flexibility in specifying combinations of parameters.
 
 ```{r setup}
 library(EEAaq)
@@ -26,12 +26,20 @@ library(tidyverse)
 # EEAaq_get_data
 Below we demonstrate the use of query by using different combinations of user-defined arguments.
 
-### Retrieve NO$_2$ data for a specific municipality (LAU zone) given its unique identifier `LAU_ID` 
+### Retrieve stations currently active in the municipality of Milano (Italy) measuring NO$_2$ concentrations
+```{r}
+IDstats <- EEAaq_get_stations(byStation = FALSE, complete = TRUE)
+IDstats_MI <- IDstats %>%
+  filter(Country %in% c("Italy"),          # Country
+         LAU_NAME %in% c("Milano"),        # City/municipality
+         AirPollutant %in% c("NO2"),       # Pollutant of interest
+         is.na(OperationalActivityEnd))    # Currently operating
+```
+
+### Retrieve NO$_2$ data for Milano according to the IDs of filtered stations
 ```{r}
 data_lau <- EEAaq::EEAaq_get_data(
-  zone_name = "15146",      # LAU zone code
-  NUTS_level = "LAU",       # NUTS level
-  LAU_ISO = "IT",           # Country code for Italy
+  IDstations = unique(IDstats_MI$AirQualityStationEoICode),   # List of stations
   pollutants = "PM10",      # Pollutant 
   from = "2022-01-01",      # Start date
   to = "2023-12-31",        # End date
@@ -45,15 +53,23 @@ head(data_lau)
 ```
 
 
-### Retrieve NO$_2$ data for a specific macroregion (Eurostat classification NUTS-1) given its name `LATN_NAME` 
+### Retrieve PM$_{10}$ and NO$_2$ data for user-defined a specific macroregion (see the Eurostat classification NUTS-1)
 ```{r}
 # Identify the names of the areas from which to download the data
-zones <- c("Région de Bruxelles-Capitale/Brussels Hoofdstedelijk Gewest","Vlaams Gewest","West-Nederland","Zuid-Nederland")
+zones <- c("Région de Bruxelles-Capitale/Brussels Hoofdstedelijk Gewest",
+           "Vlaams Gewest",
+           "West-Nederland",
+           "Zuid-Nederland")
+
+IDstats_Benelux <- IDstats %>%
+  filter(NUTS1 %in% zones,                   # Regions of interest
+    AirPollutant %in% c("NO2","PM10"),   # Pollutants of interest
+    is.na(OperationalActivityEnd)        # Currently operating
+  )
 
 # Download the corresponding data
 data <- EEAaq_get_data(
-  zone_name = zones,                 # LAU zone code
-  NUTS_level = "NUTS1",              # NUTS level
+  IDstations = unique(IDstats_Benelux$AirQualityStationEoICode),   # List of stations
   pollutants = c("NO2", "PM10"),     # Pollutant 
   from = "2023-01-01",               # Start date
   to = "2023-12-31",                 # End date
@@ -66,20 +82,18 @@ data <- EEAaq_get_data(
 unique(data$AirQualityStationEoICode)
 ```
 
+```{r}
+knitr::kable(head(data,20))
+```
+
 \
 **Note 1**:
-If the query's zone_name parameter corresponds to a valid *CITY_NAME* (i.e., not NULL in the dataset), the function will return the corresponding data. If no valid CITY_NAME is associated with the zone_name, the function attempts to retrieve all available data for the entire country and subsequently filter for the specified zone_name.
+Notice that, if the selected stations have a valid value for *CITY_NAME* (i.e., not NULL in the dataset), the function will enquire the EEA database directly with improved-speed filters (in this case, the download require a short time). If no valid CITY_NAME is associated with the stations (i.e., it is NULL for at least one station), the function attempts to retrieve all available data for the entire country and subsequently filter for the specified stations (in this case, the download can require a longer time).
 \
 
 **Note 2**:
 For very small towns or certain countries such as Turkey or Albania, data may not currently be available in the dataset.This limitation reflects the data unavailability at the [EEA Air Quality Viewer](https://discomap.eea.europa.eu/App/AQViewer/index.html?fqn=Airquality_Dissem.b2g.AirQualityStatistics).
 \
-
-**Note 3**:
-If the parameters used in the query include *polygon* or *quadrant*, the function outputs an EEAaq_df_sfc object. Otherwise, it returns an EEAaq_df object, which is a tibble dataframe.
-\
-
-
 
 
 
@@ -91,27 +105,14 @@ If the parameters used in the query include *polygon* or *quadrant*, the functio
 ```{r}
 EEAaq_map_stations(
   data = data,
-  bounds_level = "NUTS3",
+  NUTS_extborder = "NUTS2",
+  NUTS_intborder =  "NUTS3",
   color = FALSE,
   dynamic = FALSE
 )
 ```
 \
-**Note**: Using the parameter `bounds_level = "NUTS3"`, the map is generated with internal boundaries corresponding to the NUTS-3 level. The same output could be obtained specifying explicitly the zone information.
-
-
-### Map all the stations monitoring NO$_2$ and PM$_{10}$ in Belgium and The Netherlands
-```{r}
-EEAaq_map_stations(
-  zone_name = zones,
-  NUTS_level = "NUTS1",
-  pollutant = c("NO2", "PM10"),
-  bounds_level = "NUTS3",
-  color = FALSE,
-  dynamic = FALSE
-)
-```
-
+**Note**: Using the parameter `NUTS_intborder = "NUTS3"` and `NUTS_extborder = "NUTS2"`, the map is generated with internal boundaries corresponding to the NUTS-3 level and with regional (i.e., NUTS-2) external borders. The same output could be obtained specifying explicitly the zone information.
 
 ### Dynamic (interactive) map of all the PM$_{10}$ monitoring stations in Milano
 ```{r}
@@ -182,8 +183,6 @@ t_aggr$TimeAggr_byPollutant$PM10
 
 
 
-
-
 # EEAaq_idw_map
 To enable quick and intuitive visual analysis, the `EEAaq_idw_map` function provides spatial interpolation maps using the Inverse Distance Weighting (IDW) method (Shepard, 1968). This technique estimates the value of a variable at unknown locations by calculating a weighted average of known values, with weights inversely proportional to the distance from known points. Closer points contribute more heavily to the estimate, making it a practical approach for interpolating geolocated air quality data.
 
@@ -191,6 +190,8 @@ To enable quick and intuitive visual analysis, the `EEAaq_idw_map` function prov
 ```{r}
 EEAaq::EEAaq_idw_map(
   data = t_aggr,
+  NUTS_extborder = "NUTS2",
+  NUTS_intborder = "NUTS3",
   pollutant = "PM10",
   aggr_fun = "mean",
   distinct = TRUE,
@@ -203,12 +204,13 @@ EEAaq::EEAaq_idw_map(
 ### Generate IDW interpolated maps of the maximum monthly concentrations of NO$_2$ in january and february 2023 in the Netherlands and Belgium
 ```{r}
 EEAaq::EEAaq_idw_map(
-  data = t_aggr$TimeAggr_byPollutant$PM10 %>% dplyr::filter(Date %in% c("2023-01-01","2023-02-01")),
+  data = t_aggr$TimeAggr_byPollutant$PM10 %>% 
+    dplyr::filter(Date %in% c("2023-01-01","2023-02-01")),
+  NUTS_extborder = "NUTS3",
+  NUTS_intborder = "LAU",
   pollutant = "PM10",
   aggr_fun = "max",
-  distinct = TRUE,
-  gradient = TRUE,
-  idp = 2
+  dynamic = TRUE
 )
 ```
 
@@ -216,12 +218,12 @@ EEAaq::EEAaq_idw_map(
 ### Generate IDW interpolated maps of monthly average concentrations of PM$_{10}$ in the Netherlands and Belgium
 ```{r}
 EEAaq::EEAaq_idw_map(
-  data = t_aggr,
+  data = t_aggr$TimeAggr_byPollutant$PM10 %>% 
+    dplyr::filter(Date %in% c("2023-01-01","2023-02-01","2023-03-01","2023-04-01")),
+  NUTS_extborder = "NUTS2",
+  NUTS_intborder = "NUTS3",
   pollutant = "PM10",
   aggr_fun = "mean",
-  distinct = TRUE,
-  gradient = FALSE,
-  fill_NUTS_level = "NUTS3",
   dynamic = TRUE
 )
 ```

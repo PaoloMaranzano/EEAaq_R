@@ -2,10 +2,7 @@
 % Please edit documentation in R/EEAaq_summary.R
 \name{EEAaq_summary}
 \alias{EEAaq_summary}
-\title{Generate an \code{EEAaq_df} data summary.
-This function must be applied to an \code{EEAaq_df} or \code{EEAaq_df_sfc} class object and produces a list of data frames,
-containing relevant information about the data, such as descriptive statistics, missing values statistics,
-gap length and linear correlation.}
+\title{Generate an \code{EEAaq_df} data summary}
 \usage{
 EEAaq_summary(data = NULL, verbose = TRUE)
 }
@@ -30,15 +27,16 @@ pollutans is provided, organised by station.}
 }
 }
 \description{
-Generate an \code{EEAaq_df} data summary.
-This function must be applied to an \code{EEAaq_df} or \code{EEAaq_df_sfc} class object and produces a list of data frames,
+This function, applied to an \code{EEAaq_df} or \code{EEAaq_df_sfc} class object, produces a list of data frames,
 containing relevant information about the data, such as descriptive statistics, missing values statistics,
-gap length and linear correlation.
+gap length and correlation.
 }
 \examples{
 \donttest{
-### Download PM10 data for the province (NUTS-3) of Milano (Italy) from January 1st to January 31st, 2023
+### Download PM10 data for the province (NUTS-3) of Milano (Italy)
+##from January 1st to January 31st, 2023
 IDstations <- EEAaq_get_stations(byStation = TRUE, complete = FALSE)
+`\%>\%` <- dplyr::`\%>\%`
 IDstations <- IDstations \%>\%
                 dplyr::filter(NUTS3 \%in\% c("Milano")) \%>\%
                 dplyr::pull(AirQualityStationEoICode) \%>\%
