@@ -55,32 +55,32 @@ EEAaq_time_aggregate <- function(data = NULL, frequency = "monthly", aggr_fun = 
   data <- data %>% dplyr::mutate(DatetimeBegin = lubridate::with_tz(data$DatetimeBegin, tzone = "CET"), DatetimeEnd = lubridate::with_tz(data$DatetimeBegin, tzone = "CET"))
 
   data_aggr <- lapply(pollutant, function(pollutant, data, frequency) {switch (frequency, yearly = {
-    data %>% dplyr::mutate(Date = lubridate::year(.data$DatetimeBegin))  %>% dplyr::group_by(.data$AirQualityStationEoICode, .data$AirQualityStationName, .data$Date) %>% dplyr::reframe(summ = my_summarise(stats::na.omit(get(pollutant)), aggr_fun)) %>%
-      dplyr::mutate(name = aggr_fun) %>% dplyr::ungroup() %>% tidyr::pivot_wider(names_from = "name", values_from = "summ") %>% dplyr::mutate(Date = as.Date(ISOdate(.data$Date, 1, 1)))
+    data %>% dplyr::mutate(Date = lubridate::year(.data$DatetimeBegin))  %>% dplyr::group_by(.data$AirQualityStationEoICode, .data$AirQualityStationName, .data$Date) %>% dplyr::reframe(name = aggr_fun, summ = my_summarise(stats::na.omit(get(pollutant)), aggr_fun)) %>%
+    dplyr::ungroup() %>% tidyr::pivot_wider(names_from = "name", values_from = "summ") %>% dplyr::mutate(Date = as.Date(ISOdate(.data$Date, 1, 1)))
   },
   monthly = {
     data %>% dplyr::mutate(Year = lubridate::year(.data$DatetimeBegin), Month = lubridate::month(.data$DatetimeBegin, label = F)) %>%
-      dplyr::group_by(.data$AirQualityStationEoICode, .data$AirQualityStationName, .data$Year, .data$Month) %>% dplyr::reframe(summ = my_summarise(stats::na.omit(get(pollutant)), aggr_fun)) %>%
-      dplyr::mutate(name = aggr_fun) %>% dplyr::ungroup() %>% tidyr::pivot_wider(names_from = "name", values_from = "summ") %>% dplyr::mutate(Date = lubridate::ym(paste(.data$Year, .data$Month))) %>% dplyr::select(-"Year", -"Month") %>%
+      dplyr::group_by(.data$AirQualityStationEoICode, .data$AirQualityStationName, .data$Year, .data$Month) %>% dplyr::reframe(name = aggr_fun, summ = my_summarise(stats::na.omit(get(pollutant)), aggr_fun)) %>%
+      dplyr::ungroup() %>% tidyr::pivot_wider(names_from = "name", values_from = "summ") %>% dplyr::mutate(Date = lubridate::ym(paste(.data$Year, .data$Month))) %>% dplyr::select(-"Year", -"Month") %>%
       dplyr::relocate(.data$Date, .after = .data$AirQualityStationName)
   },
   weekly = {
     data %>% dplyr::mutate(Year = lubridate::year(.data$DatetimeBegin), Month = lubridate::month(.data$DatetimeBegin, label = T), Week = lubridate::floor_date(.data$DatetimeBegin, unit = "week", week_start = 1)) %>%
-      dplyr::group_by(.data$AirQualityStationEoICode, .data$AirQualityStationName, .data$Week) %>% dplyr::reframe(summ = my_summarise(stats::na.omit(get(pollutant)), aggr_fun)) %>%
-      dplyr::mutate(name = aggr_fun) %>% dplyr::ungroup() %>% tidyr::pivot_wider(names_from = "name", values_from = "summ") %>%
+      dplyr::group_by(.data$AirQualityStationEoICode, .data$AirQualityStationName, .data$Week) %>% dplyr::reframe(name = aggr_fun, summ = my_summarise(stats::na.omit(get(pollutant)), aggr_fun)) %>%
+      dplyr::ungroup() %>% tidyr::pivot_wider(names_from = "name", values_from = "summ") %>%
       dplyr::mutate(Week = lubridate::as_date(.data$Week)) %>% dplyr::rename(Date = .data$Week)
 
   },
   daily = {
     data %>% dplyr::mutate(Year = lubridate::year(.data$DatetimeBegin), Month = lubridate::month(.data$DatetimeBegin, label = T), Day = lubridate::day(.data$DatetimeBegin)) %>%
-      dplyr::group_by(.data$AirQualityStationEoICode, .data$AirQualityStationName, .data$Year, .data$Month, .data$Day) %>% dplyr::reframe(summ = my_summarise(stats::na.omit(get(pollutant)), aggr_fun)) %>%
-      dplyr::mutate(name = aggr_fun) %>% dplyr::ungroup() %>% tidyr::pivot_wider(names_from = "name", values_from = "summ") %>% dplyr::mutate(Date = lubridate::ymd(paste(.data$Year, .data$Month, .data$Day))) %>% dplyr::select(-"Year", -"Month", -"Day") %>%
+      dplyr::group_by(.data$AirQualityStationEoICode, .data$AirQualityStationName, .data$Year, .data$Month, .data$Day) %>% dplyr::reframe(name = aggr_fun, summ = my_summarise(stats::na.omit(get(pollutant)), aggr_fun)) %>%
+      dplyr::ungroup() %>% tidyr::pivot_wider(names_from = "name", values_from = "summ") %>% dplyr::mutate(Date = lubridate::ymd(paste(.data$Year, .data$Month, .data$Day))) %>% dplyr::select(-"Year", -"Month", -"Day") %>%
       dplyr::relocate(.data$Date, .after = .data$AirQualityStationName)
   },
   hourly = {
     data %>% dplyr::mutate(Year = lubridate::year(.data$DatetimeBegin), Month = lubridate::month(.data$DatetimeBegin, label = T), Day = lubridate::day(.data$DatetimeBegin), Hour = lubridate::hour(.data$DatetimeBegin)) %>%
-      dplyr::group_by(.data$AirQualityStationEoICode, .data$AirQualityStationName, .data$Year, .data$Month, .data$Day, .data$Hour) %>% dplyr::reframe(summ = my_summarise(stats::na.omit(get(pollutant)), aggr_fun)) %>%
-      dplyr::mutate(name = aggr_fun) %>% dplyr::ungroup() %>% tidyr::pivot_wider(names_from = "name", values_from = "summ") %>% dplyr::mutate(Date = lubridate::ymd_h(paste(.data$Year, .data$Month, .data$Day, .data$Hour))) %>% dplyr::select(-"Year", -"Month", -"Day", -"Hour") %>%
+      dplyr::group_by(.data$AirQualityStationEoICode, .data$AirQualityStationName, .data$Year, .data$Month, .data$Day, .data$Hour) %>% dplyr::reframe(name = aggr_fun, summ = my_summarise(stats::na.omit(get(pollutant)), aggr_fun)) %>%
+      dplyr::ungroup() %>% tidyr::pivot_wider(names_from = "name", values_from = "summ") %>% dplyr::mutate(Date = lubridate::ymd_h(paste(.data$Year, .data$Month, .data$Day, .data$Hour))) %>% dplyr::select(-"Year", -"Month", -"Day", -"Hour") %>%
       dplyr::relocate(.data$Date, .after = .data$AirQualityStationName)
   }
   )}, data = data, frequency = frequency) %>% suppressMessages() %>% suppressWarnings()
