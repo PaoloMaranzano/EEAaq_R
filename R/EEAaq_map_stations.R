@@ -92,7 +92,7 @@ EEAaq_map_stations <- function(data = NULL, NUTS_extborder = NULL, NUTS_intborde
 
   ##### Retrieve and filter metadata
   pollutants <- EEAaq_get_dataframe(dataframe = "pollutant")
-
+  pollutant <- attr(data, "pollutants")
 
   LAU <- EEAaq_get_dataframe(dataframe = "LAU")
   LAU <- dplyr::rename(LAU, geometry = Lau_geometry)
@@ -154,7 +154,7 @@ EEAaq_map_stations <- function(data = NULL, NUTS_extborder = NULL, NUTS_intborde
   ##### Data management of stations in the dataset #####
   ######################################################
   points <- stations %>%
-    dplyr::filter(.data$AirQualityStationEoICode %in% unique(data$AirQualityStationEoICode)) %>%
+    dplyr::filter(.data$AirQualityStationEoICode %in% unique(data$AirQualityStationEoICode) &  .data$AirPollutant %in% pollutant      ) %>%
     dplyr::distinct(.data$Country, .data$ISO, .data$AirQualityStationEoICode, .data$AirQualityStationNatCode,
                     .data$AirQualityStationName, .data$Longitude, .data$Latitude, .data$Altitude, .data$NUTS1,
                     .data$NUTS1_ID, .data$NUTS2, .data$NUTS2_ID, .data$NUTS3, .data$NUTS3_ID, .data$LAU_NAME, .data$LAU_ID, .data$AirPollutant)
