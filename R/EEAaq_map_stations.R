@@ -223,28 +223,48 @@ EEAaq_map_stations <- function(data = NULL, NUTS_extborder = NULL, NUTS_intborde
       build_map <- leaflet::addPolygons(map = build_map, data = mappa_nuts0, group = "NUTS 0", color = "black",  weight = 1,
                                         label = ~ paste0("NUTS_ID: ",NUTS_ID," -- ",NUTS_NAME),
                                         smoothFactor = 0.5,opacity = 1.0, fillOpacity = 0,
-                                        highlightOptions = leaflet::highlightOptions(color = "white", weight = 2, bringToFront = T), popup = mappa_nuts3$NAME_LATN,
+                                        highlightOptions = leaflet::highlightOptions(color = "white", weight = 2, bringToFront = T), popup = paste0(
+                                          "Country: ",mappa_nuts0$CNTR_CODE,
+                                          "<br>","NUTS level: 0",
+                                          "<br>","Area ID: ",mappa_nuts0$NAME_ID,
+                                          "<br>","Area Name: ",mappa_nuts0$NAME_LATN
+                                        ),
                                         options = leaflet::pathOptions(pane = "polygons"))
     } else if(NUTS_intborder == "NUTS1") {
       mappa_nuts1 <- dplyr::filter(sf::st_as_sf(NUTS), LEVL_CODE == 1 & substr(NUTS_ID,1,code_extr(NUTS_extborder)+2) %in% mappa$NUTS_ID)
       build_map <- leaflet::addPolygons(map = build_map, data = mappa_nuts1, group = "NUTS 1", color = "black",  weight = 1,
                                         label = ~ paste0("NUTS_ID: ",NUTS_ID," -- ",NUTS_NAME),
                                         smoothFactor = 0.5,opacity = 1.0, fillOpacity = 0,
-                                        highlightOptions = leaflet::highlightOptions(color = "white", weight = 2, bringToFront = T), popup = mappa_nuts3$NAME_LATN,
+                                        highlightOptions = leaflet::highlightOptions(color = "white", weight = 2, bringToFront = T), popup =   paste0(
+                                          "Country: ",mappa_nuts1$CNTR_CODE,
+                                          "<br>","NUTS level: 1",
+                                          "<br>","Area ID: ",mappa_nuts1$NAME_ID,
+                                          "<br>","Area Name: ",mappa_nuts1$NAME_LATN
+                                        ),
                                         options = leaflet::pathOptions(pane = "polygons"))
     } else if(NUTS_intborder == "NUTS2") {
       mappa_nuts2 <- dplyr::filter(sf::st_as_sf(NUTS),LEVL_CODE == 2 & substr(NUTS_ID,1,code_extr(NUTS_extborder)+2) %in% mappa$NUTS_ID)
       build_map <- leaflet::addPolygons(map = build_map, data = mappa_nuts3, group = "NUTS 2", color = "black",  weight = 1,
                                         label = ~ paste0("NUTS_ID: ",NUTS_ID," -- ",NUTS_NAME),
                                         smoothFactor = 0.5,opacity = 1.0, fillOpacity = 0,
-                                        highlightOptions = leaflet::highlightOptions(color = "white", weight = 2, bringToFront = T), popup = mappa_nuts3$NAME_LATN,
+                                        highlightOptions = leaflet::highlightOptions(color = "white", weight = 2, bringToFront = T), popup = paste0(
+                                          "Country: ",mappa_nuts2$CNTR_CODE,
+                                          "<br>","NUTS level: 2",
+                                          "<br>","Area ID: ",mappa_nuts2$NAME_ID,
+                                          "<br>","Area Name: ",mappa_nuts2$NAME_LATN
+                                        ),
                                         options = leaflet::pathOptions(pane = "polygons"))
     } else if(NUTS_intborder == "NUTS3") {
       mappa_nuts3 <- dplyr::filter(sf::st_as_sf(NUTS), LEVL_CODE == 3 & substr(NUTS_ID,1,code_extr(NUTS_extborder)+2) %in% mappa$NUTS_ID)
       build_map <- leaflet::addPolygons(map = build_map, data = mappa_nuts3, group = "NUTS 3", color = "black",  weight = 1,
                                         label = ~ paste0("NUTS_ID: ",NUTS_ID," -- ",NUTS_NAME),
                                         smoothFactor = 0.5,opacity = 1.0, fillOpacity = 0,
-                                        highlightOptions = leaflet::highlightOptions(color = "white", weight = 2, bringToFront = T), popup = mappa_nuts3$NAME_LATN,
+                                        highlightOptions = leaflet::highlightOptions(color = "white", weight = 2, bringToFront = T), popup = paste0(
+                                          "Country: ",mappa_nuts3$CNTR_CODE,
+                                          "<br>","NUTS level: 3",
+                                          "<br>","Area ID: ",mappa_nuts3$NAME_ID,
+                                          "<br>","Area Name: ",mappa_nuts3$NAME_LATN
+                                        ),
                                         options = leaflet::pathOptions(pane = "polygons"))
     } else if(NUTS_intborder == "LAU") {
       NUTS_LAU <- sf::st_join(x = sf::st_as_sf(LAU),
@@ -255,7 +275,11 @@ EEAaq_map_stations <- function(data = NULL, NUTS_extborder = NULL, NUTS_intborde
                                         label = ~ paste0("NUTS_ID: ",NUTS_ID," -- ",NUTS_NAME),
                                         group = "LAU", color = "black",  weight = .5,
                                         smoothFactor = 0.5, opacity = 1.0, fillOpacity = 0,
-                                        highlightOptions = leaflet::highlightOptions(color = "white", weight = 2, bringToFront = T), popup = mappa_lau$LAU_NAME,
+                                        highlightOptions = leaflet::highlightOptions(color = "white", weight = 2, bringToFront = T), popup =  paste0(
+                                          "Country: ",mappa_lau$CNTR_CODE,
+                                          "<br>","LAU ID: ",mappa_lau$LAU_ID,
+                                          "<br>","LAU Name: ",mappa_lau$LAU_NAME
+                                        ),
                                         options = leaflet::pathOptions(pane = "polygons"))
     }
 

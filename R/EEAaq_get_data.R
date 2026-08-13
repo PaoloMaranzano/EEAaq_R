@@ -34,7 +34,7 @@
 #'                 dplyr::pull(AirQualityStationEoICode) %>%
 #'                 unique()
 #' data <- EEAaq_get_data(IDstations = IDstations, pollutants = "PM10",
-#'                        from = "2024-01-01", to = "2025-01-31", verbose = TRUE)
+#'                        from = "2024-01-01", to = "2024-01-31", verbose = TRUE)
 #' }
 #' @export
 EEAaq_get_data <- function(IDstations = NULL, pollutants = NULL, from = NULL, to = NULL, verbose = TRUE) {
@@ -242,6 +242,13 @@ EEAaq_get_data <- function(IDstations = NULL, pollutants = NULL, from = NULL, to
         next
       }
 
+      if (httr::http_error(res)) {
+        message("EEA download service is currently unavailable.")
+        return(invisible(NULL))
+      }
+
+
+
       #corpo risposta HTTp
       content_raw1 <- httr::content(res, as = "text", encoding = "UTF-8")
 
@@ -249,7 +256,14 @@ EEAaq_get_data <- function(IDstations = NULL, pollutants = NULL, from = NULL, to
       #per separare files
       lines <- unlist(strsplit(content_raw1, "\n"))
       parquet_files <- base::grep("\\.parquet$", lines, value = TRUE)
-      if (base::length(parquet_files) == 0) stop("No valid parquet file found in the answer.")
+
+
+      if (base::length(parquet_files) == 0) {
+
+        message("No parquet files returned by the service for this query.")
+        return(invisible(NULL))
+
+      }
 
       #print(parquet_files )
       ##########################################################################################################filtro se na_sampling > 0

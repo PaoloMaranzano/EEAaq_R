@@ -57,6 +57,6 @@ IDstations <- IDstations \%>\%
                 dplyr::pull(AirQualityStationEoICode) \%>\%
                 unique()
 data <- EEAaq_get_data(IDstations = IDstations, pollutants = "PM10",
-                       from = "2024-01-01", to = "2025-01-31", verbose = TRUE)
+                       from = "2024-01-01", to = "2024-01-31", verbose = TRUE)
 }
 }

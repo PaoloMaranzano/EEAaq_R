@@ -24,22 +24,23 @@ The **EEAaq package** allows users to retrieve air quality data for multiple geo
 ```{r setup}
 library(EEAaq)
 `%>%` <- dplyr::`%>%`
+data <- readRDS(system.file("extdata", "vignette_data.rds", package = "EEAaq"))
 ```
 
 
 # EEAaq_get_data
 Below we demonstrate the use of query by using different combinations of user-defined arguments.
 
-### Retrieve NO$_2$ and PM$_10$ data for the specified station IDs
-```{r}
-#' ### Download PM10 data for the province (NUTS-3) of Milano (Italy) from January 1st 2024 to January 31st, 2025
+### Retrieve NO$_2$ and PM$_{10}$ data for the specified station IDs
+```{r, eval = FALSE}
+### Download PM10 data for the province (NUTS-3) of Milano (Italy) from January 1st 2024 to January 31st, 2025
  IDstations <- EEAaq_get_stations(byStation = TRUE, complete = FALSE)
  IDstations <- IDstations %>%
                  dplyr::filter(NUTS3 %in% c("Milano")) %>%
                dplyr::pull(AirQualityStationEoICode) %>%
                 unique()
  data <- EEAaq_get_data(IDstations = IDstations, pollutants = c("PM10", "NO2"),
-                        from = "2024-01-01", to = "2025-01-31", verbose = TRUE)
+                        from = "2024-01-01", to = "2024-01-15", verbose = TRUE)
 ```
 
 ```{r}
@@ -49,6 +50,9 @@ head(data)
 
 
 
+```{r}
+
+```
 
 
 ```{r}
@@ -131,7 +135,7 @@ summ$Corr_Matrix
 # EEAaq time aggregate
 Recall that most pollutants are monitored by EEA on a hourly or daily basis, posing challenges for interpretation and representation. The `EEAaq_time_aggregate` function simplifies this by aggregating data into annual, monthly, weekly, daily, or hourly intervals, generating summary statistics for each station in an `EEAaq_taggr_df` object.
 
-### Get the station-specific monthly minimum, maximum, average and median concentrations of NO$_2$ and PM$_{10}$ in Belgium and The Netherlands
+### Get the station-specific monthly minimum, maximum, average and median concentrations of NO$_2$ and PM$_{10}$ in Milan (greater city)
 ```{r}
 t_aggr <- EEAaq_time_aggregate(
   data = data,
