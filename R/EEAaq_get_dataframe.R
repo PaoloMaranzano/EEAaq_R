@@ -24,7 +24,7 @@
 #' @export
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' LAU <- EEAaq_get_dataframe(dataframe= "LAU")
 #' pollutant <- EEAaq_get_dataframe(dataframe = "pollutant")
 #' stations <- EEAaq_get_dataframe(dataframe = "stations")

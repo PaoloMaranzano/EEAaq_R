@@ -18,7 +18,7 @@ Reverse function of \code{EEAaq_export}. Reads an \code{EEAaq_df} object from a 
 file saved through \code{\link{EEAaq_export}}.
 }
 \examples{
-\donttest{
+\dontrun{
 `\%>\%` <- dplyr::`\%>\%`
 ### Download PM10 data for the province (NUTS-3) of Milano (Italy)
 ## from January 1st to January 31st, 2023

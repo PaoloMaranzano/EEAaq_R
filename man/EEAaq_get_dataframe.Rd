@@ -35,7 +35,7 @@ Indeed, most of the metadata information are updated and require relevant pre-pr
 For this reasons, all the metadata files are periodically pre-processed and updated (on GitHub) by the package maintainers. For issues with the data or code, please contact the development team at \href{mailto:pmaranzano.ricercastatistica@gmail.com}{pmaranzano.ricercastatistica@gmail.com}
 }
 \examples{
-\donttest{
+\dontrun{
 LAU <- EEAaq_get_dataframe(dataframe= "LAU")
 pollutant <- EEAaq_get_dataframe(dataframe = "pollutant")
 stations <- EEAaq_get_dataframe(dataframe = "stations")

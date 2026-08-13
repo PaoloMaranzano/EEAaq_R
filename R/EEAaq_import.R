@@ -6,7 +6,7 @@
 #' @return No return value, called for side effects.
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' `%>%` <- dplyr::`%>%`
 #' ### Download PM10 data for the province (NUTS-3) of Milano (Italy)
 #' ## from January 1st to January 31st, 2023

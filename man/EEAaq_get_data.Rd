@@ -47,7 +47,7 @@ of interest through their metadata files (provided by \code{EEAaq_get_stations} 
 for practical examples.
 }
 \examples{
-\donttest{
+\dontrun{
 `\%>\%` <- dplyr::`\%>\%`
 ### Download PM10 data for the province (NUTS-3) of Milano (Italy)
 ## from January 1st to January 31st, 2023

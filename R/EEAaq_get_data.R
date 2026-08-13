@@ -24,7 +24,7 @@
 #' @return A data frame of class \code{EEAaq_df}, if \code{zone_name} is specified, and of class \code{EEAaq_df_sfc}
 #' if whether the parameter \code{quadrant} or \code{polygon} is specified.
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' `%>%` <- dplyr::`%>%`
 #' ### Download PM10 data for the province (NUTS-3) of Milano (Italy)
 #' ## from January 1st to January 31st, 2023

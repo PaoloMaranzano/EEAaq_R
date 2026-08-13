@@ -45,7 +45,7 @@ Create a static or dynamic (interactive leaflet) map representing the geographic
 stations based on a user-defined input dataset of class \code{EEAaq_df} or \code{EEAaq_df_sfc}.
 }
 \examples{
-\donttest{
+\dontrun{
 `\%>\%` <- dplyr::`\%>\%`
 ### Retrieve all the stations measuring PM10 in Belgium
 IDstations <- EEAaq_get_stations(byStation = FALSE, complete = FALSE)

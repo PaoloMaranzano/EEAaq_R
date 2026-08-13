@@ -29,7 +29,7 @@ required time aggregation.
 based on the specified \code{frequency} and the aggregation functions \code{aggr_fun}.
 }
 \examples{
-\donttest{
+\dontrun{
 ### Filter all the stations installed in the city (LAU) of Milano (Italy)
 IDstations <- EEAaq_get_stations(byStation = FALSE, complete = FALSE)
 `\%>\%` <- dplyr::`\%>\%`

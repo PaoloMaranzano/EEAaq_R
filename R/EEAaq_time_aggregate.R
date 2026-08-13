@@ -11,7 +11,7 @@
 #' @return A \code{EEAaq_taggr_df} or a \code{EEAaq_taggr_df_sfc} class object, which is a tibble containing the
 #' required time aggregation.
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' ### Filter all the stations installed in the city (LAU) of Milano (Italy)
 #' IDstations <- EEAaq_get_stations(byStation = FALSE, complete = FALSE)
 #' `%>%` <- dplyr::`%>%`

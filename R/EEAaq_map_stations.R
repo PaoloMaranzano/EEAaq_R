@@ -21,7 +21,7 @@
 #' @return A map representing the specified area and the points representing the location of the stations able to detect
 #' the specified pollutants.
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' `%>%` <- dplyr::`%>%`
 #' ### Retrieve all the stations measuring PM10 in Belgium
 #' IDstations <- EEAaq_get_stations(byStation = FALSE, complete = FALSE)

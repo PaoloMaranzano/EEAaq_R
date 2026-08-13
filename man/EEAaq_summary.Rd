@@ -32,7 +32,7 @@ containing relevant information about the data, such as descriptive statistics, 
 gap length and correlation.
 }
 \examples{
-\donttest{
+\dontrun{
 ### Download PM10 data for the province (NUTS-3) of Milano (Italy)
 ##from January 1st to January 31st, 2023
 IDstations <- EEAaq_get_stations(byStation = TRUE, complete = FALSE)

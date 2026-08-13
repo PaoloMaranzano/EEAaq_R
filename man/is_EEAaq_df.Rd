@@ -18,7 +18,7 @@ Given an object as input, \code{is_EEAaq_df} verify that the given object belong
 to the \code{EEAaq_df} class.
 }
 \examples{
-\donttest{
+\dontrun{
 ### Download PM10 data for the province (NUTS-3) of Milano (Italy)
 # from January 1st to January 31st, 2023
 `\%>\%` <- dplyr::`\%>\%`
