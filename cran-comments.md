@@ -28,12 +28,14 @@ In this version:
 
 ## Test environments
 
-* local: Windows 11, R 4.6.1
-* R-hub: linux, windows, macos
-* win-builder: R-devel
+* local: Windows 11, R 4.6.1, `R CMD check --as-cran` (2026-11-20, with
+  network access): 0 errors | 0 warnings | 0 notes
+* R-hub: linux, windows, macos (to run)
+* win-builder: R-devel (to run)
 
 ## R CMD check results
 
 0 errors | 0 warnings | 1 note
 
-* New submission / package was archived on CRAN (expected).
+* New submission / package was archived on CRAN (expected on the incoming
+  checks).
