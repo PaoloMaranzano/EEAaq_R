@@ -2,3 +2,10 @@
 inst/doc
 /doc/
 /Meta/
+.Rhistory
+.Rdata
+.httr-oauth
+.DS_Store
+.quarto
+R/upload_git.R
+R/upload_git.R

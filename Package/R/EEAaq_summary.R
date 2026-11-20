@@ -157,9 +157,10 @@ EEAaq_summary <- function(data = NULL, verbose = TRUE) {
 
     data %>% dplyr::select("DatetimeBegin", "AirQualityStationEoICode", var = pollutant[1]) %>% dplyr::filter(!is.na(.data$var)) %>%
       dplyr::group_by(.data$AirQualityStationEoICode) %>%
-      dplyr::summarise(.groups = "keep", gap = lubridate::interval(.data$DatetimeBegin, .data$DatetimeBegin[-1])) %>%
+    dplyr::reframe( gap = lubridate::interval(.data$DatetimeBegin, .data$DatetimeBegin[-1])) %>%
       dplyr::mutate(gap = lubridate::time_length(.data$gap, unit = "hour")) %>% dplyr::filter(.data$gap > 0) %>%
-      dplyr::summarise(.groups = "keep", min_gap = min(.data$gap),
+      dplyr::group_by(.data$AirQualityStationEoICode) %>%
+      dplyr::reframe( min_gap = min(.data$gap),
                        q25_gap = stats::quantile(.data$gap, probs = 0.25), mean_gap = round(mean(.data$gap), 3),
                        median_gap = stats::quantile(.data$gap, probs = 0.5), q75_gap = stats::quantile(.data$gap, probs = 0.75),
                        max_gap = max(.data$gap), sd_gap = round(stats::sd(.data$gap), 3)) %>% as.data.frame() %>%
