@@ -5,6 +5,9 @@
 ##
 ##     Rscript dev/check-package.R              # build + check --as-cran
 ##     Rscript dev/check-package.R --no-check   # build only
+##     Rscript dev/check-package.R --offline    # as a CRAN machine without
+##                                              # network: every HTTP(S)
+##                                              # request goes to a dead proxy
 ##
 ## The tarball and the .Rcheck folder are written to a temporary directory
 ## whose path is printed at the end; the tarball is also copied next to the
@@ -25,6 +28,14 @@ if (!nzchar(Sys.which("pandoc")) && !nzchar(Sys.getenv("RSTUDIO_PANDOC"))) {
   found <- candidates[file.exists(file.path(candidates, "pandoc")) |
                         file.exists(file.path(candidates, "pandoc.exe"))]
   if (length(found)) Sys.setenv(RSTUDIO_PANDOC = found[1L])
+}
+if ("--offline" %in% args) {
+  ## libcurl (curl, httr) and R's own url() honour these variables, so any
+  ## download attempted by the build or the check fails at once
+  dead <- "http://127.0.0.1:9"
+  Sys.setenv(http_proxy = dead, https_proxy = dead, HTTP_PROXY = dead,
+             HTTPS_PROXY = dead, no_proxy = "", NO_PROXY = "")
+  message("offline mode: HTTP(S) requests go to ", dead)
 }
 work <- file.path(tempdir(), "EEAaq-check")
 unlink(work, recursive = TRUE)

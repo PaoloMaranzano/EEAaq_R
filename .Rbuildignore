@@ -10,3 +10,4 @@
 ^CLAUDE\.md$
 ^README\.Rmd$
 ^man/figures/logo-[A-Z]\.png$
+^vignettes/.*\.Rmd\.orig$

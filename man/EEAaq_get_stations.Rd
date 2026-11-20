@@ -24,7 +24,7 @@ see \code{stations}.
 Note that, for very small towns or certain countries, such as Turkey or Albania, data may not currently be available in the dataset. This limitation reflects the data unavailability at the the EEA Air Quality Viewer \url{https://discomap.eea.europa.eu/App/AQViewer/index.html?fqn=Airquality_Dissem.b2g.AirQualityStatistics}.
 }
 \examples{
-\donttest{
+\dontrun{
 EEAaq_get_stations(byStation = TRUE, complete = TRUE)
 }
 }

@@ -42,8 +42,8 @@ returns.*
 
 > **CRAN status (November 2026).** EEAaq 1.0.3 was archived by CRAN on
 > 2026-08-26 because its vignette downloaded data while CRAN was building it.
-> Version 1.0.4, in this repository, ships the vignette data with the package
-> and is being resubmitted. Until it is back on CRAN, install it from GitHub.
+> Version 1.0.4, in this repository, ships a precomputed vignette and is being
+> resubmitted. Until it is back on CRAN, install it from GitHub.
 
 ## Installation
 
@@ -91,8 +91,8 @@ EEAaq_idw_map(data = monthly, pollutant = "NO2", aggr_fun = "mean",
               NUTS_filler = "LAU", NUTS_extborder = "NUTS3")
 ```
 
-The object `data` of this example ships with the package, so the vignette and
-the figure below work offline:
+The object `data` of this example ships with the package, so the figure below
+can be reproduced offline:
 
 ```r
 data <- readRDS(system.file("extdata", "vignette_data.rds", package = "EEAaq"))
@@ -120,7 +120,7 @@ for PM10, 50 µg/m³.*
 | Input/output | `EEAaq_export()`, `EEAaq_import()` | Write an `EEAaq_df` to CSV or TXT and read it back with its class |
 
 The [vignette](vignettes/vignettes.Rmd) walks through every function on the
-Milano example.
+Milano example, with its outputs and maps.
 
 ## Where the data come from
 
@@ -144,7 +144,7 @@ EEAaq_R/
 ├── R/, man/, vignettes/, inst/extdata/   the package (version 1.0.4)
 ├── DESCRIPTION, NAMESPACE, NEWS.md
 ├── Support_files/   metadata read by the package at run time: do not move
-├── dev/             maintenance scripts: support-data update, check, logo, README figures
+├── dev/             maintenance scripts: support data, vignette, check, logo, README figures
 └── archive/         past releases, the 2025 vignettes, the original 2023 repository
 ```
 

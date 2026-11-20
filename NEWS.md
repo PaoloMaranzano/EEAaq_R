@@ -1,11 +1,18 @@
 # EEAaq 1.0.4
 
-* Resubmission after the archiving of 1.0.3 by CRAN (2026-08-26): the
-  vignette no longer downloads data; it reads a small `EEAaq_df` object
-  shipped in `inst/extdata/vignette_data.rds` (NO2 and PM10 at the stations
-  of the province of Milano, 1-15 January 2024).
-* Examples that need the EEA service or the metadata on GitHub are wrapped
-  in `\dontrun{}`.
+* Resubmission after the archiving of 1.0.3 by CRAN (2026-08-26). The
+  vignette is now precomputed: its source (`vignettes/vignettes.Rmd.orig`)
+  is evaluated by the maintainers with `dev/precompute-vignette.R`, and the
+  package ships the results and figures, so building it needs no internet.
+  Its example data, NO2 and PM10 at the stations of the province of Milano
+  on 1-15 January 2024, are in `inst/extdata/vignette_data.rds`.
+* All the examples need the EEA service or the metadata on GitHub and are
+  wrapped in `\dontrun{}` (the `\donttest{}` example of
+  `EEAaq_get_stations()` included).
+* The internal functions that rebuild the metadata no longer touch files
+  outside their own temporary folder: `get_LAU()` and `get_stations()`
+  worked in `C:/Temp`, which `get_LAU()` deleted on exit, and `get_NUTS()`
+  deleted the whole temporary directory of the R session.
 * The maintainer e-mail in `DESCRIPTION` is again
   pmaranzano.ricercastatistica@gmail.com.
 * The GitHub repository has been reorganised: the package is at the root of

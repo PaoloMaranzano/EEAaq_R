@@ -18,12 +18,18 @@ part of the built package lives in `dev/` (maintenance scripts),
   and is still in the history: treat it as compromised. Tokens belong in
   `~/.Renviron`.
 - **CRAN and the network.** The package was archived in August 2026 because
-  the vignette downloaded data while CRAN built it. Examples, vignettes and
-  tests must run without internet: use the data in `inst/extdata/`, and keep
-  network calls in `\dontrun{}` or behind a check that skips them.
+  the vignette downloaded data while CRAN built it. Nothing that runs during
+  `R CMD check` may use the internet: examples that need it go in
+  `\dontrun{}`, and the vignette is precomputed. Edit
+  `vignettes/vignettes.Rmd.orig`, never `vignettes.Rmd`, then run
+  `Rscript dev/precompute-vignette.R` (needs network) and commit the source,
+  the result and `vignettes/figures/` together.
 - `R CMD check` must run from a folder that is not synchronized by
   OneDrive/Google Drive: `Rscript dev/check-package.R` copies the sources to
-  the temporary directory, builds and checks with `--as-cran`.
+  the temporary directory, builds and checks with `--as-cran`; add
+  `--offline` to reproduce a CRAN machine without network.
+- Temporary files: always inside `tempfile()`/`tempdir()`, and remove only
+  the folder you created (never `unlink(tempdir())`).
 - `NAMESPACE` and `man/` are generated: edit the roxygen comments and run
   `roxygen2::roxygenise()`.
 - Logo: `Rscript dev/make-logo.R [A-C]`; README figures:
