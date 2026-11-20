@@ -1,6 +1,6 @@
 ## Before submitting (delete this section)
 
-- [ ] Run R-hub (`.github/workflows/rhub.yaml`) and win-builder (R-devel)
+- [ ] Run R-hub (`Rscript dev/run-rhub-checks.R`) and win-builder (R-devel)
       and fill in the results below.
 
 ## Resubmission of an archived package
