@@ -25,6 +25,11 @@
 ## this repository and go through git.
 ##
 ## missing_cities.rds is maintained by hand (see Support_files/README.md).
+##
+## Known issue (November 2026): get_NUTS() and get_LAU() scrape the GISCO
+## download pages, and get_NUTS() no longer finds the link to the shapefile
+## for any edition (the page has changed). Fix the scraping, or download from
+## the GISCO API, before refreshing NUTS.rds.
 ## ---------------------------------------------------------------------------
 
 args <- commandArgs(trailingOnly = TRUE)
@@ -54,15 +59,13 @@ builders <- list(
   stations = function() ns$get_stations()
 )
 
-## Safety: get_LAU() and get_stations() of version 1.0.4 work in "C:/Temp"
-## instead of tempdir(), and get_LAU() deletes that whole folder when it
-## exits. Refuse to run them until they use tempdir().
-for (f in intersect(what, c("LAU", "stations"))) {
-  fun <- c(LAU = "get_LAU", stations = "get_stations")[[f]]
-  if (any(grepl("C:/Temp", deparse(ns[[fun]]), fixed = TRUE))) {
-    stop(fun, "() still writes to C:/Temp (and get_LAU() deletes it): ",
-         "make it use tempdir() before refreshing ", f, ".rds")
-  }
+## Safety: up to version 1.0.3, get_LAU() and get_stations() worked in a fixed
+## folder (C:/Temp) and get_LAU() deleted it on exit, and get_NUTS() deleted
+## the whole tempdir() of the session. Never run the builders of an older
+## installed version.
+if (utils::packageVersion("EEAaq", lib.loc = NULL) < "1.0.4") {
+  stop("Load the development version (install pkgload): the builders of ",
+       "EEAaq < 1.0.4 delete folders outside their own temporary files.")
 }
 
 for (f in what) {

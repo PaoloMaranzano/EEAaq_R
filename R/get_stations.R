@@ -22,11 +22,10 @@ get_stations <- function() {
   # URL del file ZIP
   url <- "https://discomap.eea.europa.eu/App/AQViewer/download?fqn=Airquality_Dissem.b2g.measurements&f=csv"
 
-  # Directory temporanea per il download
-  temp_dir <- "C:/Temp"
-  if (!base::dir.exists(temp_dir)) {
-    base::dir.create(temp_dir, showWarnings = FALSE)
-  }
+  # A private folder inside the session's temporary directory, removed on exit
+  temp_dir <- base::tempfile("EEAaq_stations_")
+  base::dir.create(temp_dir)
+  on.exit(base::unlink(temp_dir, recursive = TRUE), add = TRUE)
 
   # Percorso per salvare il file ZIP
   temp_zip <- base::tempfile(tmpdir = temp_dir, fileext = ".zip")

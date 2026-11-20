@@ -45,13 +45,13 @@ get_NUTS <- function(year= "Null") {
     rvest::html_attr("href")
 
 
-  temp_file <- tempfile(fileext = ".zip")
-
-  temp_dir <- tempdir()
-  on.exit({
-    unlink(temp_file)
-    unlink(temp_dir, recursive = TRUE)
-  }, add = TRUE)
+  # A private folder inside the session's temporary directory, removed on
+  # exit: unlinking tempdir() itself would delete the temporary files of the
+  # whole R session.
+  temp_dir <- tempfile("EEAaq_NUTS_")
+  dir.create(temp_dir)
+  temp_file <- tempfile(tmpdir = temp_dir, fileext = ".zip")
+  on.exit(unlink(temp_dir, recursive = TRUE), add = TRUE)
 
   curl::curl_download(shp_link, temp_file)
   #list.files(temp_dir, full.names = TRUE)

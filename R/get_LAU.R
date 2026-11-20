@@ -54,16 +54,12 @@ get_LAU <- function(year= "Null") {
   }
   shp_url <- paste0(base_url, shp_link)
 
-  #temp_file <- tempfile(fileext = ".zip")
-  #temp_dir <- tempdir()
-  temp_dir <- "C:/Temp"
-  dir.create(temp_dir, showWarnings = FALSE)
+  # A private folder inside the session's temporary directory, removed on
+  # exit (never a fixed path outside it, and never tempdir() itself).
+  temp_dir <- tempfile("EEAaq_LAU_")
+  dir.create(temp_dir)
   temp_file <- tempfile(tmpdir = temp_dir, fileext = ".zip")
-
-  on.exit({
-    unlink(temp_file)
-    unlink(temp_dir, recursive = TRUE)
-  }, add = TRUE)
+  on.exit(unlink(temp_dir, recursive = TRUE), add = TRUE)
   #print(shp_link)
   #Download file
   curl::curl_download(shp_link, temp_file)
@@ -92,17 +88,10 @@ get_LAU <- function(year= "Null") {
   download_lau_city <- function() {
 
   url2 <- "https://ec.europa.eu/eurostat/documents/345175/501971/EU-27-LAU-2023-NUTS-2021.xlsx/40820469-1dad-6ec5-2318-46ea2993a1cf?t=1708527769154"
-  #temp_file <- tempfile(fileext = ".xlsx")
-
-  temp_dir <- "C:/Temp"
-  dir.create(temp_dir, showWarnings = FALSE)
-  temp_file <- tempfile(tmpdir = temp_dir, fileext = ".xlsx")
+  temp_file <- tempfile(fileext = ".xlsx")
+  on.exit(unlink(temp_file), add = TRUE)
 
   curl::curl_download(url2, temp_file)
-
-  on.exit({
-    unlink(temp_file)
-  }, add = TRUE)
 
   sheet_names <-suppressMessages(readxl::excel_sheets(path = temp_file)[-c(1, 2, 3)])
   data_frames <- list()
