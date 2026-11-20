@@ -1,0 +1,21 @@
+# R
+.Rproj.user
+.Rhistory
+.RData
+.Rdata
+.Ruserdata
+.httr-oauth
+.quarto
+*.Rcheck/
+/*.tar.gz
+# build artefacts
+inst/doc
+/doc/
+/Meta/
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+# credentials: tokens go in ~/.Renviron (GITHUB_PAT), never in the repository
+.Renviron
+R/upload_git.R

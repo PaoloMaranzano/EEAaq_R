@@ -1,0 +1,13 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^\.github$
+^dev$
+^doc$
+^Meta$
+^archive$
+^Support_files$
+^cran-comments\.md$
+^CLAUDE\.md$
+^README\.Rmd$
+^man/figures/logo-[A-Z]\.png$
+^vignettes/.*\.Rmd\.orig$
