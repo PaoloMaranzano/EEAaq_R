@@ -27,7 +27,9 @@ part of the built package lives in `dev/` (maintenance scripts),
 - `R CMD check` must run from a folder that is not synchronized by
   OneDrive/Google Drive: `Rscript dev/check-package.R` copies the sources to
   the temporary directory, builds and checks with `--as-cran`; add
-  `--offline` to reproduce a CRAN machine without network.
+  `--offline` to reproduce a CRAN machine without network. R-hub:
+  `Rscript dev/run-rhub-checks.R` (checks the copy on GitHub, so push first;
+  needs a PAT with the workflow scope, `--dry-run` to test without starting).
 - Temporary files: always inside `tempfile()`/`tempdir()`, and remove only
   the folder you created (never `unlink(tempdir())`).
 - `NAMESPACE` and `man/` are generated: edit the roxygen comments and run
