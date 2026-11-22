@@ -32,15 +32,21 @@ proxy, to reproduce a check machine without network access.
   without network access 0 errors | 0 warnings | 1 note, "Unable to verify
   current time", raised by the check itself when it cannot reach its time
   server (2026-11-20)
-* R-hub, `R CMD check --as-cran` on GitHub Actions (2026-11-20), with
-  0 errors | 0 warnings | 0 notes on every platform:
-  * linux: Ubuntu 26.04.1, R-devel (2026-11-19 r90939)
+* R-hub, `R CMD check --as-cran` on GitHub Actions (2026-11-22, this
+  version), with 0 errors | 0 warnings | 0 notes on:
+  * linux: Ubuntu 26.04.1, R-devel (2026-11-21 r90959)
   * windows: Windows Server 2022, R-devel (2026-11-17 r90926 ucrt)
-  * macos: macOS Sequoia 15.7.9 (x86_64), R-devel (2026-11-20 r90940)
-  * macos-arm64: macOS Tahoe 26.7.2 (aarch64), R-devel (2026-11-20 r90940)
+  * macos: macOS Sequoia 15.7.9 (x86_64), R-devel (2026-11-21 r90959)
   * ubuntu-release: Ubuntu 26.04.1, R 4.6.2
-  * ubuntu-next: Ubuntu 26.04.1, R 4.6.2 Patched (2026-11-17 r90935), the
+  * ubuntu-next: Ubuntu 26.04.1, R 4.6.2 Patched (2026-11-20 r90959), the
     flavour on which the vignette of 1.0.3 failed
+
+  On macos-arm64 (macOS Tahoe 26.7.2, R-devel 2026-11-21 r90959) the check
+  could not start, twice: there are no CRAN binaries for R 4.7 on macOS
+  arm64 yet, and the dependency arrow 26.0.1.1 did not build from source on
+  the runner (Arrow C++). The same platform gave 0 errors | 0 warnings |
+  0 notes on 2026-11-20 with the previous version, which differs only by
+  the vignette "Map of the package" and a fix in `EEAaq_get_dataframe()`.
 * win-builder: R-devel (to run)
 
 ## R CMD check results
