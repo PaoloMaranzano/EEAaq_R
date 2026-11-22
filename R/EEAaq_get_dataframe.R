@@ -51,10 +51,17 @@ EEAaq_get_dataframe <- function(dataframe = NULL){
   }
 
   # Download the corresponding file
-  temp <- tempfile()
+  temp <- tempfile(fileext = ".rds")
+  on.exit(unlink(temp), add = TRUE)
   res <- curl::curl_fetch_disk(file_urls[[dataframe]], temp)
 
   if (res$status_code == 200) {
+    # The LAU and NUTS tables keep their geometries in sfc columns. dplyr and
+    # vctrs can handle those columns only through the methods that sf
+    # registers when its namespace is loaded: without it, a dplyr verb on
+    # these tables fails in a session where sf has not been loaded yet (as
+    # EEAaq_idw_map() did when it was the first function called).
+    requireNamespace("sf", quietly = TRUE)
     result <- readRDS(temp)
     return(result)
   } else {

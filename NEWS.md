@@ -9,6 +9,11 @@
 * All the examples need the EEA service or the metadata on GitHub and are
   wrapped in `\dontrun{}` (the `\donttest{}` example of
   `EEAaq_get_stations()` included).
+* `EEAaq_get_dataframe()` loads the sf namespace before returning the
+  metadata, whose LAU and NUTS tables hold sf geometries: `EEAaq_idw_map()`
+  stopped with a vctrs error ("`x` must be a vector, not a
+  <sfc_MULTIPOLYGON> object") when it was the first function to use them in
+  an R session. The downloaded file is also removed on exit.
 * The internal functions that rebuild the metadata no longer touch files
   outside their own temporary folder: `get_LAU()` and `get_stations()`
   worked in `C:/Temp`, which `get_LAU()` deleted on exit, and `get_NUTS()`
@@ -18,6 +23,10 @@
 * The GitHub repository has been reorganised: the package is at the root of
   <https://github.com/PaoloMaranzano/EEAaq_R>, with a README, a logo and the
   maintenance scripts in `dev/`.
+* A map of the package: `vignette("function-map")` and, installed in
+  `inst/extdata/`, the diagram of the calls between the functions
+  (`EEAaq_function_map.svg`, `.pdf`) with the complete list of the calls
+  (`EEAaq_function_map.md`).
 
 # EEAaq 1.0.3 (CRAN, 2026-02-10)
 

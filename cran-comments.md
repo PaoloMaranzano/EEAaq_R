@@ -27,10 +27,11 @@ proxy, to reproduce a check machine without network access.
 
 ## Test environments
 
-* local: Windows 11, R 4.6.1, `R CMD check --as-cran` (2026-11-20):
-  with network access 0 errors | 0 warnings | 0 notes; without network
-  access 0 errors | 0 warnings | 1 note, "Unable to verify current time",
-  raised by the check itself when it cannot reach its time server
+* local: Windows 11, R 4.6.1, `R CMD check --as-cran`: with network access
+  0 errors | 0 warnings | 0 notes (2026-11-22, PDF manual included);
+  without network access 0 errors | 0 warnings | 1 note, "Unable to verify
+  current time", raised by the check itself when it cannot reach its time
+  server (2026-11-20)
 * R-hub, `R CMD check --as-cran` on GitHub Actions (2026-11-20), with
   0 errors | 0 warnings | 0 notes on every platform:
   * linux: Ubuntu 26.04.1, R-devel (2026-11-19 r90939)

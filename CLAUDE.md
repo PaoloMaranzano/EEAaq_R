@@ -7,16 +7,20 @@ part of the built package lives in `dev/` (maintenance scripts),
 
 ## Working rules
 
+- **Work directly on `main`, no branches** (the maintainer's choice since
+  2026-11-22; the branches served only the reorganisation of November 2026):
+  commit on `main` and push to `origin main` when the maintainer asks.
 - **`Support_files/` is a public API.** Every installed version of EEAaq
   downloads `LAU.rds`, `NUTS.rds`, `stations.rds`, `pollutant.rds` and
-  `missing_cities.rds` from `raw/refs/heads/main/Support_files/`. Never move
-  or rename them, and never change their columns on `main` without checking
-  that the released versions still work. Refresh them with
-  `Rscript dev/update-support-files.R` on a branch.
+  `missing_cities.rds` from `raw/refs/heads/main/Support_files/`, so a push
+  to `main` changes them for every user at once. Never move or rename them,
+  and never change their columns without checking first that the released
+  versions still work. Refresh them with `Rscript dev/update-support-files.R`.
 - **No secrets in the repository.** A GitHub token was committed in
   `Support_files/upload_git.Rd` and `upload_on_GH.txt` until November 2026
   and is still in the history: treat it as compromised. Tokens belong in
-  `~/.Renviron`.
+  the git credential store (read by `gitcreds`) or in `~/.Renviron`, never
+  in a file of the repository.
 - **CRAN and the network.** The package was archived in August 2026 because
   the vignette downloaded data while CRAN built it. Nothing that runs during
   `R CMD check` may use the internet: examples that need it go in
@@ -32,8 +36,19 @@ part of the built package lives in `dev/` (maintenance scripts),
   needs a PAT with the workflow scope, `--dry-run` to test without starting).
 - Temporary files: always inside `tempfile()`/`tempdir()`, and remove only
   the folder you created (never `unlink(tempdir())`).
+- The `vignettes/function-map.Rmd` vignette runs no R code beyond
+  `knitr::include_graphics()`, so it is built at check time; only
+  `vignettes.Rmd` is precomputed.
 - `NAMESPACE` and `man/` are generated: edit the roxygen comments and run
   `roxygen2::roxygenise()`.
+- `dev/maintainer-workflow.R` is the maintainer's step-by-step script in
+  RStudio (change, debug, check, push, CRAN release); keep it in line with
+  the other scripts of `dev/` when they change.
+- Map of the package: after adding, removing or renaming a function, or
+  changing who calls whom, run `Rscript dev/make-function-map.R`: it scans
+  `R/`, stops if a function is missing from its `layers` table or if the
+  layout is not clean, and writes `inst/extdata/EEAaq_function_map.*`,
+  `man/figures/function-map.svg` and `vignettes/function-map.svg`.
 - Logo: `Rscript dev/make-logo.R [A-C]`; README figures:
   `Rscript dev/readme-figures.R` (both offline, from `Support_files/`).
 - History: the layout before November 2026 is the tag
