@@ -7,12 +7,16 @@
 ## Ctrl+Shift+O shows the list of the sections. Do not source() it: the first
 ## line stops it, because some steps publish (push, CRAN).
 ##
-##   0. Setup                    packages and folders, once per session
+##   0. Setup                    packages, folders and helpers, once per session
 ##   1. Change a function        code, documentation, version, NEWS, map
 ##   2. Debug                    load_all(), debugonce(), browser(), recover
 ##   3. Check in RStudio         R CMD check --as-cran, as CRAN does
 ##   4. Commit and push          directly on main
-##   5. Release on CRAN          R-hub, tarball, win-builder, submission, tag
+##   5. The .tar.gz for CRAN     EEAaq_<version>.tar.gz in the GitHub folder
+##   6. Submit to CRAN           R-hub, win-builder, upload by hand, tag
+##
+## A new version, typically: 0, 1 (and 2 if something does not work), 3 until
+## the check is clean, 4, then 5 and 6 when the version goes to CRAN.
 ##
 ## Rules of the repository (see CLAUDE.md): man/ and NAMESPACE are generated
 ## by roxygen2; the extended vignette is edited in vignettes.Rmd.orig and
@@ -52,6 +56,23 @@ release_dir <- dirname(repo)
 ## A shortcut to run git from R; the RStudio Git pane (top right) does the same
 ## with buttons.
 git <- function(...) system2("git", c(...))
+
+## build_tarball() builds EEAaq_<version>.tar.gz, as R CMD build does, and
+## returns its path. It works on a copy of the sources in a new folder of the
+## temporary directory of this session, outside OneDrive, whose
+## synchronisation locks the files the build writes; R deletes that folder
+## when the session ends. The copy leaves out what .Rbuildignore excludes
+## anyway (Support_files/ alone is 30 MB). The vignettes are rebuilt from
+## their precomputed results, without internet. Used by sections 3 and 5.
+build_tarball <- function() {
+  src <- file.path(tempfile("EEAaq-build-"), "EEAaq")
+  dir.create(src, recursive = TRUE)
+  skip <- c(".git", ".Rproj.user", "dev", "archive", "Support_files", "doc", "Meta")
+  file.copy(file.path(repo, setdiff(list.files(repo, all.files = TRUE, no.. = TRUE), skip)),
+            src, recursive = TRUE)
+  unlink(file.path(src, "inst", "doc"), recursive = TRUE)
+  pkgbuild::build(src, dest_path = dirname(src), manual = FALSE)
+}
 
 ## Current version and state of the repository
 read.dcf("DESCRIPTION", "Version")[1, 1]
@@ -136,44 +157,32 @@ install.packages(repo, repos = NULL, type = "source")
 
 
 ## ---- 3. Check in RStudio ------------------------------------------------------------
-## R CMD check --as-cran, as CRAN runs it. The check must not run in the
-## OneDrive folder, whose synchronisation locks the files the check writes:
-## the sources are copied to a folder of the temporary directory of this
-## session, which R deletes when the session ends. (The Check button of the
-## RStudio Build pane checks in place, in OneDrive: do not use it.)
+## R CMD check --as-cran, as CRAN runs it, on the tarball built from the
+## current files. Like the build, the check runs outside OneDrive. (The Check
+## button of the RStudio Build pane checks in place, in OneDrive: do not use
+## it.)
 offline <- FALSE   # TRUE: every internet request fails, as on a CRAN machine
                    # without network (expected: 1 NOTE "unable to verify
                    # current time", which CRAN does not show)
 manual <- nzchar(Sys.which("pdflatex"))   # check the PDF manual too (needs LaTeX)
 
-check_dir <- file.path(tempdir(), "EEAaq-check")
-unlink(check_dir, recursive = TRUE)        # only the folder created here
-dir.create(check_dir)
-src <- file.path(check_dir, "EEAaq")
-dir.create(src)
-skip <- c(".git", ".Rproj.user", "dev", "archive", "Support_files", "doc", "Meta")
-file.copy(file.path(repo, setdiff(list.files(repo, all.files = TRUE, no.. = TRUE), skip)),
-          src, recursive = TRUE)
-unlink(file.path(src, "inst", "doc"), recursive = TRUE)
+## 3.1 Build the tarball (a minute or two).
+tarball <- build_tarball()
 
-## 3.1 Build the tarball, as R CMD build does (the vignettes are rebuilt from
-##     their precomputed results, without internet).
-tarball <- pkgbuild::build(src, dest_path = check_dir, manual = FALSE)
-
-## 3.2 Check it.
+## 3.2 Check it (two or three minutes).
 env <- c(`_R_CHECK_CRAN_INCOMING_REMOTE_` = "false", `_R_CHECK_FORCE_SUGGESTS_` = "false")
 if (offline) {
   env <- c(env, http_proxy = "http://127.0.0.1:9", https_proxy = "http://127.0.0.1:9",
            HTTP_PROXY = "http://127.0.0.1:9", HTTPS_PROXY = "http://127.0.0.1:9")
 }
 res <- rcmdcheck::rcmdcheck(tarball, args = c("--as-cran", if (!manual) "--no-manual"),
-                            check_dir = check_dir, error_on = "never", env = env)
+                            check_dir = dirname(tarball), error_on = "never", env = env)
 
 ## 3.3 The result: the target is 0 errors | 0 warnings | 0 notes. Every
 ##     remaining NOTE must be explained in cran-comments.md.
 res
 res$errors; res$warnings; res$notes
-file.edit(file.path(check_dir, "EEAaq.Rcheck", "00check.log"))   # the full log
+file.edit(file.path(dirname(tarball), "EEAaq.Rcheck", "00check.log"))   # the full log
 
 
 ## ---- 4. Commit and push -------------------------------------------------------------
@@ -185,31 +194,43 @@ git("commit", "-m", shQuote("Describe the change in one line"))
 git("push", "origin", "main")
 
 
-## ---- 5. Release on CRAN ----------------------------------------------------------
-## 5.1 R-hub: the same check on Linux, Windows and macOS, on GitHub. It checks
-##     the copy on GitHub, so push first (section 4). Results in about one
-##     hour in the Actions tab of the repository.
+## ---- 5. The .tar.gz for CRAN -----------------------------------------------------
+## The file uploaded by hand on the CRAN page (section 6) is the "source
+## tarball" of the package, EEAaq_<version>.tar.gz. These lines build it from
+## the current files of the repository and save it in the GitHub folder, next
+## to EEAaq_R. Before: section 0 in this session, the check of section 3 clean
+## on these same files, and the new Version in DESCRIPTION (CRAN refuses a
+## version number it already has).
+tarball <- build_tarball()
+tarball_for_cran <- file.path(release_dir, basename(tarball))
+file.copy(tarball, tarball_for_cran, overwrite = TRUE)
+tarball_for_cran          # the file to upload
+browseURL(release_dir)    # opens the folder that contains it
+
+
+## ---- 6. Submit to CRAN -----------------------------------------------------------
+## 6.1 R-hub: the same check on Linux, Windows and macOS, on GitHub. It checks
+##     the copy on GitHub, so push first (section 4). Results in one to two
+##     hours in the Actions tab of the repository.
 source("dev/run-rhub-checks.R")
 
-## 5.2 The tarball to upload: the one built in section 3, copied next to the
-##     repository (rerun section 3 if the sources changed since).
-file.copy(tarball, release_dir, overwrite = TRUE)
-(tarball_for_cran <- file.path(release_dir, basename(tarball)))
-
-## 5.3 win-builder: the CRAN machine for Windows, with R-devel. Upload the
-##     tarball in the R-devel field of the page; the result comes by e-mail to
-##     the maintainer in DESCRIPTION, usually within an hour.
+## 6.2 win-builder: the CRAN machine for Windows, with R-devel. On the page,
+##     upload the file of section 5 in the R-devel field; the result comes by
+##     e-mail to the maintainer in DESCRIPTION, usually within an hour.
 browseURL("https://win-builder.r-project.org/upload.aspx")
 
-## 5.4 Write the results in cran-comments.md (and delete its "Before
+## 6.3 Write the results in cran-comments.md (and delete its "Before
 ##     submitting" section); its text goes in the comment box of the form.
 file.edit("cran-comments.md")
 
-## 5.5 Submit: upload the tarball on the CRAN form. CRAN then sends an e-mail
-##     to the maintainer with a link to confirm the submission.
+## 6.4 Submit by hand: on the CRAN form fill in your name and the e-mail of the
+##     maintainer in DESCRIPTION, choose the file of section 5, paste the text
+##     of cran-comments.md in the comments, upload, check the summary and
+##     submit. CRAN then sends an e-mail to the maintainer with a link that
+##     confirms the submission: until it is clicked, nothing reaches CRAN.
 browseURL("https://cran.r-project.org/submit.html")
 
-## 5.6 When CRAN publishes the package: tag the version and push the tag.
+## 6.5 When CRAN publishes the package: tag the version and push the tag.
 version <- read.dcf("DESCRIPTION", "Version")[1, 1]
 git("tag", "-a", paste0("v", version), "-m", shQuote(paste("EEAaq", version, "on CRAN")))
 git("push", "origin", paste0("v", version))
