@@ -21,7 +21,9 @@
 
 # EEAaq 1.0.3 (CRAN, 2026-02-10)
 
-* `EEAaq_time_aggregate()` and `EEAaq_summary()` revised.
+* `EEAaq_time_aggregate()` and `EEAaq_summary()` revised: they use
+  `dplyr::reframe()` where a group returns more than one row, since dplyr
+  1.2.0 turned that use of `summarise()` into an error (GitHub issue #1).
 * R-hub workflow for the CRAN checks.
 
 # EEAaq 1.0.2 (CRAN, 2026-01-21)

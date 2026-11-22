@@ -1,7 +1,8 @@
 ## Before submitting (delete this section)
 
-- [ ] Run R-hub (`Rscript dev/run-rhub-checks.R`) and win-builder (R-devel)
-      and fill in the results below.
+- [x] Run R-hub (`Rscript dev/run-rhub-checks.R`) and fill in the results
+      below.
+- [ ] Run win-builder (R-devel) and fill in the result below.
 
 ## Resubmission of an archived package
 
@@ -30,7 +31,15 @@ proxy, to reproduce a check machine without network access.
   with network access 0 errors | 0 warnings | 0 notes; without network
   access 0 errors | 0 warnings | 1 note, "Unable to verify current time",
   raised by the check itself when it cannot reach its time server
-* R-hub: linux, windows, macos (to run)
+* R-hub, `R CMD check --as-cran` on GitHub Actions (2026-11-20), with
+  0 errors | 0 warnings | 0 notes on every platform:
+  * linux: Ubuntu 26.04.1, R-devel (2026-11-19 r90939)
+  * windows: Windows Server 2022, R-devel (2026-11-17 r90926 ucrt)
+  * macos: macOS Sequoia 15.7.9 (x86_64), R-devel (2026-11-20 r90940)
+  * macos-arm64: macOS Tahoe 26.7.2 (aarch64), R-devel (2026-11-20 r90940)
+  * ubuntu-release: Ubuntu 26.04.1, R 4.6.2
+  * ubuntu-next: Ubuntu 26.04.1, R 4.6.2 Patched (2026-11-17 r90935), the
+    flavour on which the vignette of 1.0.3 failed
 * win-builder: R-devel (to run)
 
 ## R CMD check results
