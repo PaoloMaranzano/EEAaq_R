@@ -30,10 +30,17 @@ part of the built package lives in `dev/` (maintenance scripts),
   the result and `vignettes/figures/` together.
 - `R CMD check` must run from a folder that is not synchronized by
   OneDrive/Google Drive: `Rscript dev/check-package.R` copies the sources to
-  the temporary directory, builds and checks with `--as-cran`; add
-  `--offline` to reproduce a CRAN machine without network. R-hub:
+  the temporary directory, builds and checks with `--as-cran`; online it
+  also runs the CRAN incoming checks on every URL and file link, as CRAN
+  does (R-hub skips them); add `--offline` to reproduce a CRAN machine
+  without network. R-hub:
   `Rscript dev/run-rhub-checks.R` (checks the copy on GitHub, so push first;
   needs a PAT with the workflow scope, `--dry-run` to test without starting).
+- `README.md` and `NEWS.md` are part of the built package and CRAN checks
+  their links: a link to something that is only on GitHub (`dev/`,
+  `Support_files/`, `archive/`) must be a full `https://github.com/...` URL,
+  never a relative path. Do not link `dd.eionet.europa.eu`: it timed out
+  from the CRAN check machine (November 2026).
 - Temporary files: always inside `tempfile()`/`tempdir()`, and remove only
   the folder you created (never `unlink(tempdir())`).
 - The `vignettes/function-map.Rmd` vignette runs no R code beyond

@@ -9,7 +9,7 @@
 #' @return A tibble containing the stations information. Further details available here \code{stations}.
 #'
 #' @details
-#' Note that, for very small towns or certain countries, such as Turkey or Albania, data may not currently be available in the dataset. This limitation reflects the data unavailability at the the EEA Air Quality Viewer <https://discomap.eea.europa.eu/App/AQViewer/index.html?fqn=Airquality_Dissem.b2g.AirQualityStatistics>.
+#' Note that, for very small towns or certain countries, such as Turkey or Albania, data may not currently be available in the dataset. This limitation reflects the data unavailability at the EEA Air Quality Viewer (Air Quality Statistics).
 #'
 #' @examples
 #' \dontrun{

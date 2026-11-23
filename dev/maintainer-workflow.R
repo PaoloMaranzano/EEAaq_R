@@ -169,8 +169,12 @@ manual <- nzchar(Sys.which("pdflatex"))   # check the PDF manual too (needs LaTe
 ## 3.1 Build the tarball (a minute or two).
 tarball <- build_tarball()
 
-## 3.2 Check it (two or three minutes).
-env <- c(`_R_CHECK_CRAN_INCOMING_REMOTE_` = "false", `_R_CHECK_FORCE_SUGGESTS_` = "false")
+## 3.2 Check it (two or three minutes). Online, the CRAN incoming checks run
+##     as on CRAN: they test every URL and file link of the package (README.md,
+##     NEWS.md, help pages, vignettes): a link to a folder that is only on
+##     GitHub (dev/, Support_files/, archive/) must be a full https:// URL.
+env <- c(`_R_CHECK_CRAN_INCOMING_REMOTE_` = if (offline) "false" else "true",
+         `_R_CHECK_FORCE_SUGGESTS_` = "false")
 if (offline) {
   env <- c(env, http_proxy = "http://127.0.0.1:9", https_proxy = "http://127.0.0.1:9",
            HTTP_PROXY = "http://127.0.0.1:9", HTTPS_PROXY = "http://127.0.0.1:9")
@@ -178,8 +182,10 @@ if (offline) {
 res <- rcmdcheck::rcmdcheck(tarball, args = c("--as-cran", if (!manual) "--no-manual"),
                             check_dir = dirname(tarball), error_on = "never", env = env)
 
-## 3.3 The result: the target is 0 errors | 0 warnings | 0 notes. Every
-##     remaining NOTE must be explained in cran-comments.md.
+## 3.3 The result: the target is 0 errors | 0 warnings, and no NOTE except
+##     "New submission" (online, while the version is not on CRAN) or
+##     "unable to verify current time" (offline). Every other NOTE must be
+##     fixed or explained in cran-comments.md.
 res
 res$errors; res$warnings; res$notes
 file.edit(file.path(dirname(tarball), "EEAaq.Rcheck", "00check.log"))   # the full log

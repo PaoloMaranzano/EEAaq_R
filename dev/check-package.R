@@ -61,12 +61,16 @@ if ("--no-check" %in% args) {
   quit(save = "no")
 }
 
+## Online, the CRAN incoming checks run as on CRAN: they test every URL and
+## every file link of the package (README.md, NEWS.md, help pages, vignettes)
+## and compare the version with the one on CRAN, so they also give the NOTE
+## "New submission" while the package is not on CRAN. Offline they cannot run.
 res <- rcmdcheck::rcmdcheck(
   tar,
   args = c("--as-cran", "--no-manual"),
   check_dir = work,
   error_on = "never",
-  env = c(`_R_CHECK_CRAN_INCOMING_REMOTE_` = "false",
+  env = c(`_R_CHECK_CRAN_INCOMING_REMOTE_` = if ("--offline" %in% args) "false" else "true",
           `_R_CHECK_FORCE_SUGGESTS_` = "false")
 )
 print(res)

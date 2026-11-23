@@ -23,6 +23,10 @@
 * The GitHub repository has been reorganised: the package is at the root of
   <https://github.com/PaoloMaranzano/EEAaq_R>, with a README, a logo and the
   maintenance scripts in `dev/`.
+* Links to EEA web pages that do not answer reliably (dd.eionet.europa.eu,
+  www.eea.europa.eu, discomap.eea.europa.eu) are removed from DESCRIPTION,
+  README and help pages; the links of the README to the parts of the GitHub
+  repository that are not in the package are now full URLs.
 * A map of the package: `vignette("function-map")` and, installed in
   `inst/extdata/`, the diagram of the calls between the functions
   (`EEAaq_function_map.svg`, `.pdf`) with the complete list of the calls
